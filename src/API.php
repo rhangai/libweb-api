@@ -27,6 +27,12 @@ class API {
 
 		$this->ignoreFiles_[] = realpath( $ignoreFiles );
 	}
+	/***
+	 * Add some files to be ignores
+	 */
+	public function addCustomHandler( $name, $class ) {
+		$this->customHandlers_[ $name ] = $class;
+	}
 	/**
 	 * Dispatch the API
 	 */

@@ -1,0 +1,13 @@
+{
+    "name": "renanhangai/libweb-api",
+    "description": "LibWeb API part",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "renanhangai",
+            "email": "hangai.renan@gmail.com"
+        }
+    ],
+    "require": {}
+}

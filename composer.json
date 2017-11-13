@@ -9,5 +9,11 @@
             "email": "hangai.renan@gmail.com"
         }
     ],
-    "require": {}
+    "require": {},
+	"autoload": {
+		"psr-4": {
+			"LibWeb\\api\\": "src/api"
+		},
+		"classmap": [ "src/API.php" ]
+	}
 }

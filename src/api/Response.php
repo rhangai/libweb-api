@@ -1,13 +1,13 @@
 <?php
 namespace LibWeb\api;
 
+
+/**
+ * Response 
+ */
+
 class Response {
 
-	private $code_          = 200;
-	private $data_          = null;
-	private $headers_       = array();
-	private $raw_           = false;
-	
 	/// Get the response data
 	public function getData() { return $this->data_; }
 	/// Get the headers
@@ -81,4 +81,10 @@ class Response {
 			$expires = time() + $expiresAfter;
 		setcookie( $name, $value, $expires, "/", "", false, true );
 	}
+
+	// Internal variables
+	private $code_          = 200;
+	private $data_          = null;
+	private $headers_       = array();
+	private $raw_           = false;
 };

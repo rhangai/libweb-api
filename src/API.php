@@ -3,20 +3,19 @@ namespace LibWeb;
 
 use LibWeb\api\Response;
 use LibWeb\api\Request;
+use LibWeb\api\Util;
 use LibWeb\api\ExceptionNotFound;
-use LibWeb\util\ArrayInterface;
 
 
 class API {
-	private $rootNamespace;
-	private $rootDir;
-	private $ignoreFiles;
 	/// Construct the API
 	public function __construct( $namespace = null, $dir = null ) {
-		$this->rootNamespace = $namespace;
-		$this->rootDir		 = $dir;
+		$this->rootNamespace_ = $namespace;
+		$this->rootDir_       = $dir;
 	}
-	/// Add a few ignore files
+	/***
+	 * Add some files to be ignores
+	 */
 	public function addIgnore( $ignoreFiles ) {
 		if ( !$ignoreFiles )
 			return;
@@ -26,93 +25,45 @@ class API {
 			return;
 		}
 
-		$this->ignoreFiles[] = realpath( $ignoreFiles );
+		$this->ignoreFiles_[] = realpath( $ignoreFiles );
 	}
-	/// Dispatch the URI
+	/**
+	 * Dispatch the API
+	 */
 	public function dispatch( $base = null, $uri = null, $method = null ) {
 		$req = Request::createFromGlobals( $base, $uri, $method );
 		return $this->dispatchRequest( $req );
 	}
-	/// Dispatch the request
+	/**
+	 * Dispatch the request
+	 */
 	public function dispatchRequest( $req, $send = true ) {
-		$res	= $req->createResponse();
-		$method = $this->dispatchInternal( $req, $res );
-		if ( $method === false ) {
-			$ret = $this->handleNotFound( $req, $res );
-			if ( $ret != null )
-				$res->data( $ret );
+		$method = $req->method();
+		$result = $this->processRequest( $req, $res );
+		if ( $result === false ) {
+			$result = $this->handleNotFound( $req, $res );
+			if ( $result != null )
+				$res->data( $result );
 		}
-		$headersOnly = ($method === 'OPTIONS');
-		if ( $send )
+		if ( $send ) {
+			$headersOnly = ($method === 'OPTIONS');
 			$this->sendResponse( $req, $res, $headersOnly );
+		}
 		return $res;
 	}
 	/**
-	 * Internally dispatches the API
+	 * Dispatch the request
 	 */
-	private function dispatchInternal( $req, $res ) {
-		$uri   = $req->uri();
-		$base  = $req->base();
-		if ( $base ) {
-			$len = strlen( $base );
-			if ( substr( $uri, 0, $len ) !== $base )
-				return false;
-			$uri = '/'.substr( $uri, $len );
-		}
-
-		if ( Config::get( "debug" ) )
-			$this->handleDebug( $req, $res, $uri );
-		
-		$paths = array_values( array_filter( explode( "/", $uri ) ) );
-		$len   = count( $paths );
-		
-		$preHandlers = array();
-
-
-		
-		$path	 = array_slice( $paths, 0, $len - 1 );
-		$obj	 = $this->resolvePath( $path, $this->rootDir, $this->rootNamespace );
-		if ( !$obj )
-			return false;
-		$functionName = $this->resolveFunction( $obj, $paths[ $len - 1 ], $req );
-		
-		$method = strtoupper( $req->method() );
-		if ( $method === 'OPTIONS' ) {
-			$this->handleOptions( $req, $res );
-			return $method;
-		}
-		$mainHandler = array( $obj, $method.'_' . $functionName );
-		if ( !$mainHandler || !is_callable( $mainHandler ) )
-			return false;
-
-		// Handle options if found
-		$this->handleOptions( $req, $res );
-		
-		// Check for middleware on the current path
-		$handler  = array( $this, "middleware" );
-		if ( is_callable( $handler ) )
-			$preHandlers[] = $handler;
-		
-		// Check for middleware on the current object
-		$handler  = array( $obj, "middleware" );
-		if ( is_callable( $handler ) )
-			$preHandlers[] = $handler;
-		
-		// Check for middlewares on the path
-		for ( $i = 0; $i < $len - 1; ++$i ) {
-			$path	= array_slice( $paths, 0, $i );
-			$path[] = "_Parent";
-			$obj	= $this->resolvePath( $path, $this->rootDir, $this->rootNamespace );
-			if ( $obj ) {
-				$handler = array( $obj, "middleware" );
-				if ( is_callable( $handler ) )
-					$preHandlers[] = $handler;
-			}
-		}
-
-		// Call handlers
-		$handlers	= $preHandlers;
-		$handlers[] = $mainHandler;
+	public function processRequest( $req, &$res = null ) {
+		if ( !$res )
+			$res = $req->createResponse();
+		return $this->dispatchInternal( $req, $res );
+	}
+	/**
+	 * Dispatch a list of handlers
+	 * @return true If any handler was dispatched
+	 */
+	private function dispatchHandlers( $req, $res, $handlers ) {
 		foreach( $handlers as $handler ) {
 			try {
 				$ret = call_user_func( $handler, $req, $res );
@@ -122,55 +73,88 @@ class API {
 				error_log( $e );
 				Debug::exception( $e );
 				$res->code( 500 );
-				$res->data( Config::get( "debug" ) ? null : $this->debugFormatException( $e ) );
-				break;
+				$res->data( Config::get( "debug" ) ? null : Util::debugFormatException( $e ) );
+				return true;
 			}
-
 			if ( $ret != null ) {
 				$res->data( $ret );
-				break;
+				return true;
 			} else if ( $res->getData() )
-				break;
+				return true;
 		}
-		return $method;
+		return false;
 	}
-	/// Resolve a path to a object
-	protected function resolvePath( $path, $rootDir, $rootNamespace ) {
-		if ( !$path )
-			return $this;
-		$path[ count($path) - 1 ] = API::_toPascalCase( $path[ count($path) - 1 ], true );
-		$file = implode( "/", $path ).".php";
-		if ( $rootDir )
-			$file = $rootDir."/".$file;
-		$file = realpath( $file );
-		if ( in_array( $file, $this->ignoreFiles ) )
-			return null;
+	/**
+	 * Internally dispatches the API
+	 */
+	private function dispatchInternal( $req, $res ) {
+		$method = $req->method();
 		
-		$included = @include $file;
-		if ( $included === false )
-			 return null;
-
-		$len = count( $path );
-		if ( !$rootNamespace ) {
-			$klassname = "\\".$path[ $len - 1 ]."API";
-		} else {
-			$klassname = $rootNamespace."\\".implode( "\\", $path )."API";
+		// Handle the options
+		if ( $method === 'OPTIONS' ) {
+			$this->handleOptions( $req, $res );
+			return true;
 		}
-		$obj = new $klassname;
-		return $obj;
+
+		// Try to dispatch the middlewares
+		$finish = $this->dispatchHandlers( $req, $res, $this->middlewares_ );
+		if ( $finish )
+			return true;
+
+		// The request path
+		$path = Util::uriToPath( $req->relativeUri() );
+		$handlers = $this->getHandlersForPath( $path, $method );
+		if ( !$handlers )
+			return false;
+		return $this->dispatchHandlers( $req, $res, $handlers );
 	}
-	/// Resolve a function name
-	protected function resolveFunction( $obj, $name, $req ) {
-		return self::_toPascalCase( $name );
+	/// Get the handler
+	private function getHandlersForPath( $path, $httpMethod ) {
+		$pathLen = count( $path );
+		$apiPath = implode( "/", array_slice( $path, 0, $pathLen - 1 ) );
+		if ( isset( $this->customHandlers_[ $apiPath ] ) ) {
+			$classname = $this->customHandlers_[ $apiPath ];
+		} else {
+			$namespaceName = $this->rootNamespace_."\\".implode( "\\", array_slice( $path, 0, $pathLen - 2 ) );
+			$classname     = $namespaceName . '\\'. ucwords( $path[ $pathLen - 2 ] ).'API';
+		}
+		if ( !class_exists( $classname ) )
+			return false;
+
+		$obj = new $classname;
+		$mainHandler = $this->getHandlerForObject( $obj, $path[$pathLen-1], $httpMethod );
+		if ( !$mainHandler )
+			return false;
+		
+		$handlers = array();
+		$handlers[] = $mainHandler;
+		return $handlers;
+		
 	}
-	/// Convert to pascal case
-	private static function _toPascalCase( $str, $capitalizeFirst = false ) {
-		$str = str_replace(' ', '', ucwords(str_replace('-', ' ', $str)));
-		if ( !$capitalizeFirst )
-			$str = lcfirst( $str );
-		return $str;
+	/// Get the handler
+	protected function getHandlerForObject( $obj, $apiMethod, $httpMethod ) {
+		if ( $httpMethod === 'GET' ) {
+			$handler = array( $obj, 'GET_'.$apiMethod );
+			if ( is_callable( $handler ) )
+				return $handler;
+			$handler = array( $obj, 'REQUEST_'.$apiMethod );
+			if ( is_callable( $handler ) )
+				return $handler;
+			return false;
+		} else if ( $httpMethod === 'POST' ) {
+			$handler = array( $obj, 'POST_'.$apiMethod );
+			if ( is_callable( $handler ) )
+				return $handler;
+			$handler = array( $obj, 'REQUEST_'.$apiMethod );
+			if ( is_callable( $handler ) )
+				return $handler;
+			return false;
+		}
 	}
-	/// Format the response
+
+	/**
+	 * Format a response to send
+	 */
 	public function formatResponse( $status, $data, $errorType, $req, $res ) {
 		if ( $data instanceof \Exception ) {
 			$error = array();
@@ -190,31 +174,9 @@ class API {
 			$data = $data->serializeAPI();
 		return $data;
 	}
-	// Make a debugable interface for an exception
-	public function debugFormatException( $exception, $skipPrevious = false ) {
-		$info =  array(
-			"code"		=> $exception->getCode(),
-			"message"	=> $exception->getMessage(),
-			"file"		=> $exception->getFile(),
-			"line"		=> $exception->getLine(),
-			"trace"		=> explode( "\n", $exception->getTraceAsString() ),
-			"exception" => $exception->__toString(),
-			'$obj'		=> $exception,
-		);
-		if ( !$skipPrevious  ) {
-			$previousList = array();
-			$current = $exception;
-			while ( true ) {
-				$current = $current->getPrevious();
-				if ( !$current || !($current instanceof \Exception) )
-					break;
-				$previousList = $this->debugFormatException( $current, true );
-			}
-			$info[ "previous" ] = $previousList;
-		}
-		return $info;
-	}
-	/// Defaults to sending JSON api
+	/**
+	 * Send the response (calls format)
+	 */
 	public function sendResponse( $req, $res, $headersOnly = false ) {
 		$responseCode = $res->getCode() ?: 200;
 		$headers	  = $res->getHeaders();
@@ -259,59 +221,7 @@ class API {
 	}
 	/// Write the response
 	public function writeResponse( $obj ) {
-		$this->writeJSON( $obj );
-	}
-	/// Write a JSON
-	public function writeJSON( $obj ) {
-		$isArray  = false;
-		$isObject = false;
-		if ( is_array( $obj ) ) {
-			reset( $obj );
-			$firstKey = key( $obj );
-			end( $obj );
-			$lastKey  = key( $obj );
-			$size	  = count( $obj );
-			if ( ( $firstKey === 0 ) && ( $lastKey === ( $size-1 ) ) )
-				$isArray = true;
-			else
-				$isObject = true;
-		} else if ( is_object( $obj ) ) {
-			if ( ( $obj instanceof \ArrayAccess ) || ( $obj instanceof ArrayInterface ) )
-				$isArray  = true;
-			else
-				$isObject = true;
-		}
-		
-		if ( $isArray ) {
-			echo "[";
-			$first = true;
-			foreach( $obj as $val ) {
-				if ( $first ) {
-					$first = false;
-				} else {
-					echo ",";
-				}
-				$this->writeJSON( $val );
-			}
-			echo "]";
-		} else if ( $isObject ) {
-			if ( is_callable( $obj, '__toString' ) )
-				echo $obj;
-			echo "{";
-			$first = true;
-			foreach( $obj as $key => $val ) {
-				if ( $first ) {
-					$first = false;
-				} else {
-					echo ",";
-				}
-				echo '"', $key,'":';
-				$this->writeJSON( $val );
-			}
-			echo "}";
-		} else {
-			echo json_encode( $obj );
-		}
+		Util::writeJSON( $obj );
 	}
 	/// Internal not found handler (May be overwritten)
 	public function handleNotFound( $req, $res ) {
@@ -338,19 +248,10 @@ class API {
 		}
 	}
 
-	public function handleDebug( $req, $res, $uri ) {
-		if ( $uri === '/_debug.js' )
-			Debug::dumpJs( $req->base() );
-		else if ( $uri === '/_debug.css' )
-			Debug::dumpCss();
-		else if ( $uri === '/_debug/handler.json' )
-			Debug::dumpHandler();
-		else if ( self::_strStartsWith( $uri, "/_debug/fontawesome-webfont" ) )
-			Debug::dumpFontAwesome( $uri );
-	}
-
-	private static function _strStartsWith( $str, $other ) {
-		return (substr( $str, 0, strlen( $other ) ) === $other );
-	}
-	
+	// Variable
+	private $rootNamespace_;
+	private $rootDir_;
+	private $ignoreFiles_ = array();
+	private $middlewares_ = array();
+	private $customHandlers_ = array();
 };

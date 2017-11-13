@@ -1,19 +1,23 @@
 {
-    "name": "renanhangai/libweb-api",
-    "description": "LibWeb API part",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "renanhangai",
-            "email": "hangai.renan@gmail.com"
-        }
-    ],
-    "require": {},
+	"name": "renanhangai/libweb-api",
+	"description": "LibWeb API part",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "renanhangai",
+			"email": "hangai.renan@gmail.com"
+		}
+	],
+	"require": {},
 	"autoload": {
 		"psr-4": {
 			"LibWeb\\api\\": "src/api"
 		},
-		"classmap": [ "src/API.php", "src/APIException.php" ]
-	}
+		"classmap": [
+			"src/API.php",
+			"src/APIException.php"
+		]
+	},
+	"version": "0.0.0"
 }

@@ -17,6 +17,9 @@
 		"classmap": [
 			"src/API.php",
 			"src/APIException.php"
+		],
+		"files": [
+			"src/api/validator/RuleFile.php"
 		]
 	},
 	"version": "0.0.1"

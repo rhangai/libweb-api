@@ -120,7 +120,6 @@ class API {
 			$classname = $this->customHandlers_[ $apiPath ];
 		} else {
 			$classname = $this->getClassname( $this->rootNamespace_, array_slice( $path, 0, $pathLen - 1 ) );
-			error_log( $classname );
 		}
 		if ( !class_exists( $classname ) )
 			return false;

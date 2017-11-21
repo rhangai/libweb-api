@@ -86,6 +86,17 @@ class Util {
 		return array_map( __CLASS__.'::uriToPathComponent', $paths );
 	}
 	/**
+	 * Normalize a namespace name
+	 */
+	public static function normalizeNamespace( $namespace ) {
+		if ( $namespace ) {
+			$namespaceLen = strlen($namespace);
+			if ( $namespace[$namespaceLen - 1] === '\\' )
+				$namespace = substr( $namespace, 0, $namespaceLen - 1 );
+		}
+		return $namespace;
+	}
+	/**
 	 * Debug
 	 */
 	public static function debugFormatException( $exception, $skipPrevious = false ) {

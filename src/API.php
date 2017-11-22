@@ -16,6 +16,10 @@ class API {
 		$middleware = array( $this, 'middleware' );
 		if ( is_callable( $middleware ) )
 			$this->middlewares_[] = $middleware;
+
+		if ( Config::get( "debug" ) ) {
+			$this->addCustomHandler( "_debug", "\\LibWeb\\api\\DebugHandler" );
+		}
 	}
 	/***
 	 * Add some files to be ignored

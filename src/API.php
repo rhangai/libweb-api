@@ -78,7 +78,7 @@ class API {
 				$ret = $this->handleException( $e, $req, $res );
 			} catch( \Error $e ) {
 				error_log( $e );
-				Debug::exception( $e );
+				Debug::exception( new \ErrorException( $e->getMessage(), $e->getCode(), E_ERROR, $e->getFile(), $e->getLine(), $e ) );
 				$res->code( 500 );
 				$res->data( Config::get( "debug" ) ? null : Util::debugFormatException( $e ) );
 				return true;
@@ -178,7 +178,7 @@ class API {
 					$error["data"] = $errorData;
 			}
 			if ( Config::get( "debug" ) )
-				$error['$debug'] = $this->debugFormatException( $data );
+				$error['$debug'] = Util::debugFormatException( $data );
 			return $error ?: null;
 		}
 		

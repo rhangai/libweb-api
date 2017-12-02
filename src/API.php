@@ -96,12 +96,15 @@ class API {
 	private function dispatchInternal( $req, $res ) {
 		$method = $req->method();
 		
+		// Prepare the request
+		$this->prepare( $req, $res );
+		
 		// Handle the options
 		if ( $method === 'OPTIONS' ) {
 			$this->handleOptions( $req, $res );
 			return true;
 		}
-
+		
 		// Try to dispatch the middlewares
 		$finish = $this->dispatchHandlers( $req, $res, $this->middlewares_ );
 		if ( $finish )
@@ -228,6 +231,9 @@ class API {
 	/// Write the response
 	public function writeResponse( $obj ) {
 		Util::writeJSON( $obj );
+	}
+	/// Prepare the request
+	public function prepare( $req, $res ) {
 	}
 	/// Internal not found handler (May be overwritten)
 	public function handleNotFound( $req, $res ) {

@@ -10,25 +10,26 @@ use LibWeb\api\ExceptionNotFound;
 class API {
 	/// Construct the API
 	public function __construct( $namespace = null, $dir = null ) {
-		$this->rootNamespace_ = $namespace;
+		$this->rootNamespace_ = Util::normalizeNamespace( $namespace );
 		$this->rootDir_       = $dir;
+
+		$middleware = array( $this, 'middleware' );
+		if ( is_callable( $middleware ) )
+			$this->middlewares_[] = $middleware;
+
+		if ( Config::get( "debug" ) ) {
+			$this->addCustomHandler( "_debug", "\\LibWeb\\api\\DebugHandler" );
+		}
 	}
 	/***
-	 * Add some files to be ignores
+	 * Add some files to be ignored
+	 * @deprecated
 	 */
 	public function addIgnore( $ignoreFiles ) {
-		if ( !$ignoreFiles )
-			return;
-		if ( is_array( $ignoreFiles ) ) {
-			foreach ( $ignoreFiles as $file )
-				$this->addIgnore( $file );
-			return;
-		}
-
-		$this->ignoreFiles_[] = realpath( $ignoreFiles );
+		trigger_error( "Do NOT use the addIgnore file. You must use composer classmap.", E_USER_DEPRECATED );
 	}
 	/***
-	 * Add some files to be ignores
+	 * Add a custom handler
 	 */
 	public function addCustomHandler( $name, $class ) {
 		$this->customHandlers_[ $name ] = $class;
@@ -77,7 +78,7 @@ class API {
 				$ret = $this->handleException( $e, $req, $res );
 			} catch( \Error $e ) {
 				error_log( $e );
-				Debug::exception( $e );
+				Debug::exception( new \ErrorException( $e->getMessage(), $e->getCode(), E_ERROR, $e->getFile(), $e->getLine(), $e ) );
 				$res->code( 500 );
 				$res->data( Config::get( "debug" ) ? null : Util::debugFormatException( $e ) );
 				return true;
@@ -115,7 +116,8 @@ class API {
 		$handlers = $this->getHandlersForPath( $path, $method );
 		if ( !$handlers )
 			return false;
-		return $this->dispatchHandlers( $req, $res, $handlers );
+		$this->dispatchHandlers( $req, $res, $handlers );
+		return true;
 	}
 	/// Get the handler
 	private function getHandlersForPath( $path, $httpMethod ) {
@@ -124,8 +126,7 @@ class API {
 		if ( isset( $this->customHandlers_[ $apiPath ] ) ) {
 			$classname = $this->customHandlers_[ $apiPath ];
 		} else {
-			$namespaceName = $this->rootNamespace_."\\".implode( "\\", array_slice( $path, 0, $pathLen - 2 ) );
-			$classname     = $namespaceName . '\\'. ucwords( $path[ $pathLen - 2 ] ).'API';
+			$classname = $this->getClassname( $this->rootNamespace_, array_slice( $path, 0, $pathLen - 1 ) );
 		}
 		if ( !class_exists( $classname ) )
 			return false;
@@ -138,7 +139,12 @@ class API {
 		$handlers = array();
 		$handlers[] = $mainHandler;
 		return $handlers;
-		
+	}
+	/// Get the classname
+	protected function getClassname( $root, $path ) {
+		$base = array_pop( $path );
+		$path = $path ? "" : ( implode( "\\", $path )."\\" );
+		return $root . $path . ucwords( $base ) . "API";
 	}
 	/// Get the handler
 	protected function getHandlerForObject( $obj, $apiMethod, $httpMethod ) {
@@ -175,7 +181,7 @@ class API {
 					$error["data"] = $errorData;
 			}
 			if ( Config::get( "debug" ) )
-				$error['$debug'] = $this->debugFormatException( $data );
+				$error['$debug'] = Util::debugFormatException( $data );
 			return $error ?: null;
 		}
 		
@@ -263,7 +269,6 @@ class API {
 	// Variable
 	private $rootNamespace_;
 	private $rootDir_;
-	private $ignoreFiles_ = array();
 	private $middlewares_ = array();
 	private $customHandlers_ = array();
 };

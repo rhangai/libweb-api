@@ -143,7 +143,7 @@ class API {
 	/// Get the classname
 	protected function getClassname( $root, $path ) {
 		$base = array_pop( $path );
-		$path = $path ? "" : ( implode( "\\", $path )."\\" );
+		$path = !$path ? "\\" : ( "\\".implode( "\\", $path )."\\" );
 		return $root . $path . ucwords( $base ) . "API";
 	}
 	/// Get the handler

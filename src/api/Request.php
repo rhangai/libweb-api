@@ -78,6 +78,13 @@ class Request {
 			return $this->cookies_[$name];
 		return $default;
 	}
+	// Get a header
+	public function header( $name, $default = null ) {
+		$name = 'HTTP_'.mb_strtoupper( str_replace( "-", "_", $name ) );
+		if ( !isset( $this->server_[ $name ] ) )
+			return $default;
+		return $this->server_[ $name ];
+	}
 
 	/**
 	 * Get a file by its name

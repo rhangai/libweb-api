@@ -9,7 +9,9 @@
 			"email": "hangai.renan@gmail.com"
 		}
 	],
-	"require": {},
+	"require": {
+		"renanhangai/libweb-core": "*"
+	},
 	"autoload": {
 		"psr-4": {
 			"LibWeb\\api\\": "src/api"
@@ -21,6 +23,9 @@
 		"files": [
 			"src/api/validator/RuleFile.php"
 		]
+	},
+	"suggest": {
+		"maximebf/debugbar": "Provides better debug functionality"
 	},
 	"version": "0.4.0"
 }

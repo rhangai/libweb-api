@@ -27,9 +27,12 @@ class Util {
 				$isObject = true;
 		// Check if Object
 		} else if ( is_object( $obj ) ) {
-			// Write the data to a string
-			if ( method_exists( $obj, '__toString' ) ) {
-				echo $obj;
+			// Check for serializable objects
+			if ( $obj instanceof \JsonSerializable ) {
+				self::writeJson( $obj->jsonSerialize() );
+				return;
+			} else if ( method_exists( $obj, '__toString' ) ) {
+				echo json_encode( $obj->__toString() );
 				return;
 			}
 			

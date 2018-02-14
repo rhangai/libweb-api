@@ -31,7 +31,8 @@ class Request {
 		$this->cookies_ = $cookies;
 		$this->data_    = array();
 
-		if ( @$server["CONTENT_TYPE"] === "application/json" ) {
+		$contentType = @explode( ';', @$server["CONTENT_TYPE"] ?: '', 2 );
+		if ( $contentType[0] === "application/json" ) {
 			$data = json_decode( @file_get_contents( "php://input" ) );
 			if ( $data )
 				$this->post_ = array_merge( $this->post_, ( array ) $data );

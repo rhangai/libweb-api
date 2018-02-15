@@ -31,6 +31,9 @@ class Util {
 			if ( $obj instanceof \JsonSerializable ) {
 				self::writeJson( $obj->jsonSerialize() );
 				return;
+			} else if ( $obj instanceof JsonEchoable ) {
+				$obj->jsonEcho();
+				return;
 			} else if ( method_exists( $obj, '__toString' ) ) {
 				echo json_encode( $obj->__toString() );
 				return;

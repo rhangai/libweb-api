@@ -37,9 +37,8 @@ class App extends \Slim\App {
 	 */
 	public function wrapHandler( $callable ) {
 		$app = $this;
-		$container = $this->getContainer();
-		return function( $request, $response, $params ) use ( $callable, $app, $container ) {
-			$resolver = $container->get('callableResolver');
+		return function( $request, $response, $params ) use ( $callable, $app ) {
+			$resolver = $app->getContainer()->get('callableResolver');
 			$args = [ $request, $response, $params ];
 			
 			$callable = $resolver->resolve( $callable );

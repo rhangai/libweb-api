@@ -1,0 +1,25 @@
+{
+	"name": "renanhangai/libweb-api",
+	"description": "LibWeb API part",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "renanhangai",
+			"email": "hangai.renan@gmail.com"
+		}
+	],
+	"require": {
+		"slim/slim": "^3.9",
+		"violet/streaming-json-encoder": "^1.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"libweb\\api\\": "src/api"
+		}
+	},
+	"suggest": {
+		"maximebf/debugbar": "Provides better debug functionality"
+	},
+	"version": "1.0.0-beta"
+}

@@ -6,7 +6,7 @@ namespace libweb\api;
  */
 class Exception extends \Exception implements \JsonSerializable {
 	// Overrides the map function to wrap the handler
-	public function __construct( string $message, int $code, $data ) {
+	public function __construct( string $message, int $code = 0, $data = null ) {
 		parent::__construct( $message, $code );
 		$this->data_ = $data;
 	}

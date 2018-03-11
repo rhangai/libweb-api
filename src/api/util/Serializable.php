@@ -40,6 +40,8 @@ class Serializable implements \JsonSerializable {
 		else if ( is_array( $item ) )
 			return new SerializableIterator( new \ArrayIterator( $item ), $type ) ;
 		else if ( is_object( $item ) ) {
+			if ( !($item instanceof \stdClass ) )
+				throw new \Exception( "Object cannot be serialized" );
 			return new SerializableIterator( $item, $type );
 		}
 		return $item;

@@ -12,7 +12,8 @@
 	"require": {
 		"slim/slim": "^3.9",
 		"violet/streaming-json-encoder": "^1.1",
-		"webmozart/path-util": "^2.3"
+		"webmozart/path-util": "^2.3",
+		"renanhangai/validator": "^1.2"
 	},
 	"autoload": {
 		"psr-4": {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "63f6f98885134a6544867e9fdc03b492",
+    "content-hash": "dcb896da9ff533b07cd281d0e57b4c24",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -36,6 +36,53 @@
             "description": "Promoting the interoperability of container objects (DIC, SL, etc.)",
             "homepage": "https://github.com/container-interop/container-interop",
             "time": "2017-02-14T19:40:03+00:00"
+        },
+        {
+            "name": "marcj/topsort",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/marcj/topsort.php.git",
+                "reference": "387086c2db60ee0a27ac5df588c0f0b30c6bdc4b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/marcj/topsort.php/zipball/387086c2db60ee0a27ac5df588c0f0b30c6bdc4b",
+                "reference": "387086c2db60ee0a27ac5df588c0f0b30c6bdc4b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "phpunit/phpunit": "~4.0",
+                "symfony/console": "~2.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MJS\\TopSort\\": "src/",
+                    "MJS\\TopSort\\Tests\\": "tests/Tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Marc J. Schmidt",
+                    "email": "marc@marcjschmidt.de"
+                }
+            ],
+            "description": "High-Performance TopSort/Dependency resolving algorithm",
+            "keywords": [
+                "dependency resolving",
+                "topological sort",
+                "topsort"
+            ],
+            "time": "2016-11-19T14:58:11+00:00"
         },
         {
             "name": "nikic/fast-route",
@@ -231,6 +278,59 @@
                 "response"
             ],
             "time": "2016-08-06T14:39:51+00:00"
+        },
+        {
+            "name": "renanhangai/validator",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/renanhangai/libweb-validator.git",
+                "reference": "c4981de2f3883855093e4679de133dc1ee01490d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/renanhangai/libweb-validator/zipball/c4981de2f3883855093e4679de133dc1ee01490d",
+                "reference": "c4981de2f3883855093e4679de133dc1ee01490d",
+                "shasum": ""
+            },
+            "require": {
+                "marcj/topsort": "^1.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.4",
+                "rtlopez/decimal": "^1.0"
+            },
+            "suggest": {
+                "rtlopez/decimal": "Allows decimal validation using v::decimal($digits, $decimal)"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LibWeb\\validator\\": "src/validator"
+                },
+                "classmap": [
+                    "src/Validator.php",
+                    "src/ValidatorException.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "renanhangai",
+                    "email": "hangai.renan@gmail.com"
+                }
+            ],
+            "description": "Validate any php variable using a very simple sintax.",
+            "keywords": [
+                "Simple",
+                "data",
+                "validate",
+                "validator"
+            ],
+            "time": "2018-02-07T19:24:28+00:00"
         },
         {
             "name": "slim/slim",

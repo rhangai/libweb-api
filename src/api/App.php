@@ -8,6 +8,17 @@ use Webmozart\PathUtil\Path;
 
 class App extends \Slim\App {
 
+	/**
+	 * Add
+	 */
+	public function __construct( $container = array() ) {
+		parent::__construct( $container );
+		$container = $this->getContainer();
+		$container["request"] = function( $container ) {
+			return Request::createFromEnvironment( $container->get( 'environment' ) );
+		};
+	}
+
 	// Overrides the map function to wrap the handler
 	public function map( array $methods, $pattern, $callable ) {
 		return parent::map( $methods, $pattern, $this->wrapHandler( $callable ) );
@@ -42,7 +53,7 @@ class App extends \Slim\App {
 		if ( !class_exists( $class ) )
 			throw new \InvalidArgumentException( "Cannot find class '$class'." );
 		$app = $this;
-		$pattern = Path::join( "/", $base, "{method:.*}" );
+		$pattern = Path::join( $base, "{method:.*}" );
 		return $this->any( $pattern, function( $request, $response, $params ) use ( $app, $class ) {
 			return $app->_dispatchApiClass( $request, $response, $params, $class, $params["method"] );
 		});
@@ -66,7 +77,7 @@ class App extends \Slim\App {
 	 */
 	public function mapPath( $base, $dir, $classTemplate = "{path}{class}API" ) {
 		$app = $this;
-		$pattern = Path::join( "/", $base, "{path:.*}" );
+		$pattern = Path::join( $base, "{path:.*}" );
 		return $this->any( $pattern, function( $request, $response, $params ) use ( $app, $dir, $classTemplate ) {
 			// Normalize the parts for the path
 			$path  = Path::canonicalize( $params["path"] );

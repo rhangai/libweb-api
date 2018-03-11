@@ -16,25 +16,33 @@ class Serializable implements \JsonSerializable {
 		$this->item_ = $item;
 		$this->type_ = $propelType;
 	}
-
-	/// Serialize some common types
+	/// Perform the serialization
 	public function jsonSerialize() {
-		if ( $this->item_ instanceof \JsonSerializable )
-			return $this->item_->jsonSerialize();
-		else if ( $this->item_ instanceof \Propel\Runtime\Util\PropelModelPager ) {
+		return self::serialize( $this->item_, $this->type_ );
+	}
+	/// Serialize some common types
+	public static function serialize( $item, $type ) {
+		if ( $item instanceof \JsonSerializable )
+			return self::serialize( $item->jsonSerialize(), $type );
+		else if ( $item instanceof \Propel\Runtime\Util\PropelModelPager ) {
 			return array( 
-				"page_current"  => $this->item_->getPage(),
-				"page_total"    => $this->item_->getLastPage(),
-				"index_first"   => $this->item_->getFirstIndex(),
-				"index_last"    => $this->item_->getLastIndex(),
-				"total" => $this->item_->getNbResults(),
-				"items" => new SerializablePropelCollection( $this->item_, $this->type_ ),
+				"page_current"  => $item->getPage(),
+				"page_total"    => $item->getLastPage(),
+				"index_first"   => $item->getFirstIndex(),
+				"index_last"    => $item->getLastIndex(),
+				"total" => $item->getNbResults(),
+				"items" => new SerializableIterator( $item, $type ),
 			);
-		} else if ( $this->item_ instanceof \Propel\Runtime\Collection\Collection )
-			return array( "items" => new SerializablePropelCollection( $this->item_, $this->type_ ) );
-		else if ( $this->item_ instanceof \Propel\Runtime\ActiveRecord\ActiveRecordInterface )
-			return $this->item_->toArray( $this->type_ );
-		return $this->item_;
+		} else if ( $item instanceof \Propel\Runtime\Collection\Collection )
+			return array( "items" => new SerializableIterator( $item, $type ) );
+		else if ( $item instanceof \Propel\Runtime\ActiveRecord\ActiveRecordInterface )
+			return $item->toArray( $type );
+		else if ( is_array( $item ) )
+			return new SerializableIterator( new \ArrayIterator( $item ), $type ) ;
+		else if ( is_object( $item ) ) {
+			return new SerializableIterator( $item, $type );
+		}
+		return $item;
 	}
 
 	private $item_;

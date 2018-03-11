@@ -6,7 +6,7 @@ namespace libweb\api\util;
  * 
  * It iterates through every item on the collection and transforms it
  */
-class SerializablePropelCollection extends \IteratorIterator {
+class SerializableIterator extends \IteratorIterator {
 	/// COnstruct the collection iteration
 	public function __construct( $collection, $type = Serializable::DEFAULT_PROPEL_TYPE ) {
 		parent::__construct( $collection );
@@ -15,11 +15,7 @@ class SerializablePropelCollection extends \IteratorIterator {
 	/// Transform the propel object into a serializable object
 	public function current() {
 		$item = parent::current();
-		if ( !$item )
-			return $item;
-		if ( $item instanceof \JsonSerializable )
-			return $item->jsonSerialize();
-		return $item->toArray( $this->type_ );
+		return Serializable::serialize( $item, $this->type_ );
 	}
 	/// Type of the propel
 	private $type_;

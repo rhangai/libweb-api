@@ -39,6 +39,8 @@ class App extends \Slim\App {
 	public function run( $silent = false ) {
 		if ( $this->corsEnabled_ )
 			$this->corsRun_();
+		if ( $this->documentator_ )
+			$this->documentator_->generate();
 		return parent::run( $silent );
 	}
 

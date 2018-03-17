@@ -2,20 +2,23 @@
 namespace libweb\api;
 
 use libweb\api\util\Serializable;
-use \Violet\StreamingJsonEncoder\BufferJsonEncoder;
-use \Violet\StreamingJsonEncoder\JsonStream;
 use Webmozart\PathUtil\Path;
 
 class App extends \Slim\App {
 
 	/**
-	 * Add
+	 * Construct the app using default response and request objects
 	 */
 	public function __construct( $container = array() ) {
 		parent::__construct( $container );
 		$container = $this->getContainer();
 		$container["request"] = function( $container ) {
 			return Request::createFromEnvironment( $container->get( 'environment' ) );
+		};
+		$container["response"] = function( $container ) {
+			$headers  = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
+			$response = new Response(200, $headers);
+			return $response->withProtocolVersion($container->get('settings')['httpVersion']);
 		};
 	}
 	/**
@@ -147,7 +150,6 @@ class App extends \Slim\App {
 		/// Does nothing when already a response
 		if ( $data instanceof \Psr\Http\Message\ResponseInterface )
 			return $data;
-
 		if ( $error ) {
 			if ( !$data instanceof \JsonSerializable )
 				throw $data;
@@ -155,11 +157,7 @@ class App extends \Slim\App {
 		} else {
 			$responseData = array( "status" => "success", "data" => new Serializable( $data ) );
 		}
-		$encoder = new BufferJsonEncoder( $responseData );
-		$stream  = new JsonStream( $encoder );
-		return $response
-			->withHeader('Content-Type', 'application/json;charset=utf-8')
-			->withBody( $stream );
+		return $response->withJson( $responseData );
 	}
 	/**
 	 * Wrap a new callable for the map
@@ -181,8 +179,6 @@ class App extends \Slim\App {
 			return $app->formatResponse( $request, $response, $params, $data, $error );
 		};
 	}
-
-
 	/**
 	 * Enable CORS on the current application
 	 * @param $allowedOrigin The allowed origin for cors request
@@ -198,7 +194,7 @@ class App extends \Slim\App {
 				->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
 				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 		});
-		$this->options( "/{route:.*}", function ($request, $response, $args) {
+		parent::options( "/{route:.*}", function ($request, $response, $args) {
 			return $response;
 		});
 	}

@@ -18,6 +18,14 @@ class App extends \Slim\App {
 			return Request::createFromEnvironment( $container->get( 'environment' ) );
 		};
 	}
+	/**
+	 * Overrides application run
+	 */
+	public function run( $silent = false ) {
+		if ( $this->corsEnabled_ )
+			$this->corsRun_();
+		return parent::run( $silent );
+	}
 
 	// Overrides the map function to wrap the handler
 	public function map( array $methods, $pattern, $callable ) {
@@ -173,4 +181,39 @@ class App extends \Slim\App {
 			return $app->formatResponse( $request, $response, $params, $data, $error );
 		};
 	}
+
+
+	/**
+	 * Enable CORS on the current application
+	 * @param $allowedOrigin The allowed origin for cors request
+	 */
+	public function cors( $allowedOrigin = '*' ) {
+		if ( $this->corsEnabled_ )
+			return;
+		$this->corsEnabled_ = true;
+		$this->add(function( $request, $response, $next ) use ( $allowedOrigin ) {
+			$response = $next( $request, $response );
+			return $response
+				->withHeader('Access-Control-Allow-Origin', $allowedOrigin )
+				->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+		});
+		$this->options( "/{route:.*}", function ($request, $response, $args) {
+			return $response;
+		});
+	}
+	/**
+	 * Prepare the application for CORS
+	 */
+	private function corsRun_() {
+		$app = $this;
+		parent::map( ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], "/{route:.*}", function ($request, $response, $args) use ( $app ) {
+			$handler  = $app->getContainer()->notFoundHandler;
+			$response = $handler( $request, $response );
+			return $response;
+		});
+	}
+
+	// Variables
+	private $corsEnabled_ = false;
 }

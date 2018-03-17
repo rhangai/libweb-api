@@ -2,6 +2,8 @@
 namespace libweb\api;
 
 use libweb\api\util\Serializable;
+use libweb\api\docs\Documentator;
+use libweb\api\docs\GeneratorInterface;
 use Webmozart\PathUtil\Path;
 
 class App extends \Slim\App {
@@ -22,6 +24,16 @@ class App extends \Slim\App {
 		};
 	}
 	/**
+	 * Make the app documentate itself
+	 */
+	public function documentate( $generator = null, array $options = array() ) {
+		if ( !$this->documentator_ )
+			$this->documentator_ = new Documentator;
+		if ( $generator !== null )
+			$this->documentator_->addGenerator( $generator, $options );
+	}
+	
+	/**
 	 * Overrides application run
 	 */
 	public function run( $silent = false ) {
@@ -30,8 +42,25 @@ class App extends \Slim\App {
 		return parent::run( $silent );
 	}
 
+	/**
+	 * Group functions by route
+	 */
+	public function group( $base, $callback ) {
+		if ( $this->documentator_ )
+			$this->documentator_->pushDocGroup( $base, $callback );
+		$ret = parent::group( $base, $callback );
+		if ( $this->documentator_ )
+			$this->documentator_->popDocGroup();
+		return $ret;
+	}
+
 	// Overrides the map function to wrap the handler
 	public function map( array $methods, $pattern, $callable ) {
+		if ( $this->documentator_ ) {
+			if ( !$this->docSkipNext_ )
+				$this->documentator_->addMap( $methods, $pattern, $callable );
+			$this->docSkipNext_ = false;
+		}
 		return parent::map( $methods, $pattern, $this->wrapHandler( $callable ) );
 	}
 	/**
@@ -63,6 +92,12 @@ class App extends \Slim\App {
 	public function mapClass( $base, $class ) {
 		if ( !class_exists( $class ) )
 			throw new \InvalidArgumentException( "Cannot find class '$class'." );
+
+		if ( $this->documentator_ ) {
+			$this->documentator_->addClass( $base, $class );
+			$this->docSkipNext_ = true;
+		}
+
 		$app = $this;
 		$pattern = Path::join( $base, "{method:.*}" );
 		return $this->any( $pattern, function( $request, $response, $params ) use ( $app, $class ) {
@@ -212,4 +247,6 @@ class App extends \Slim\App {
 
 	// Variables
 	private $corsEnabled_ = false;
+	private $documentator_ = null;
+	private $docSkipNext_ = false;
 }

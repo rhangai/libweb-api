@@ -37,10 +37,13 @@ class App extends \Slim\App {
 	 * Overrides application run
 	 */
 	public function run( $silent = false ) {
+		if ( $this->documentator_ ) {
+			$this->documentator_->generate();
+			echo "Documentation generated.\n";
+			return;
+		}
 		if ( $this->corsEnabled_ )
 			$this->corsRun_();
-		if ( $this->documentator_ )
-			$this->documentator_->generate();
 		return parent::run( $silent );
 	}
 

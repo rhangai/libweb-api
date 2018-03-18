@@ -9,10 +9,13 @@ use Webmozart\PathUtil\Path;
  */
 class Documentator {
 
+	const GENERATORS = array(
+		"markdown" => "\\libweb\\api\\docs\\generator\\Markdown",
+	);
 	const METHODS = array( "GET", "POST", "PUT", "DELETE" );
 
 	public function __construct() {
-		$this->root_ = new Page( null, null );
+		$this->root_ = new Page( null, true, null );
 		$this->currentPage_ = $this->root_;
 		$this->docParser_ = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
 	}
@@ -20,20 +23,18 @@ class Documentator {
 	public function addMap( $methods, $route, $callable ) {
 	}
 	public function addClass( $base, $class ) {
-		$fullpath = Path::canonicalize( Path::join( implode( "/", $this->groupPaths_ ), $base ) );
+		$fullpath = Path::join( implode( "/", $this->groupPaths_ ), $base );
 		$reflectionClass = new \ReflectionClass( $class );
 
-		$pageName = basename( $fullpath );
+		$page = $this->currentPage_->createChild( strtolower( basename( $fullpath ) ) );
+
+		
 		$classBlock = $this->parseBlock( $reflectionClass );
 		if ( $classBlock ) {
-			$pageName = $classBlock->getSummary();
+			$page->setTitle( $classBlock->getSummary() );
+			$page->setDescription( $classBlock->getDescription() );
 		}
-
-		$page = $this->currentPage_->createChild( $pageName );
-
-		if ( $classBlock )
-			$page->setTitle( $classBlock->getDescription() );
-			
+		
 		foreach ( $reflectionClass->getMethods() as $method ) {
 			$methodName = $method->getName();
 			if ( !preg_match( "/^([A-Z]+)_(.+)$/", $methodName, $matches ) )
@@ -51,6 +52,23 @@ class Documentator {
 	}
 	
 	public function addGenerator( $generator, $options = array() ) {
+		if ( is_string( $generator ) ) {
+			$generatorClass = @self::GENERATORS[$generator];
+			if ( !$generatorClass ) {
+				if ( !class_exists( $generator ) )
+					throw new \InvalidArgumentException( "Invalid generator '$generator'. Must be a valid class or one of: ".implode( ", ", array_keys( self::GENERATORS ) ) );
+				$generatorClass = $generator;
+			}
+			
+			$generator = new $generatorClass;
+		}
+
+		if ( !$generator instanceof GeneratorInterface )
+			throw new \InvalidArgumentException( "Generator is not an instance of \\libweb\\api\\docs\\GeneratorInterface. Given: ".get_class( $generator ) );
+
+		if ( !is_array( $options ) )
+			throw new \InvalidArgumentException( "Invalid options. Must be an array." );
+		$generator->setOptions( $options );
 		$this->generators_[] = $generator;
 	}
 	public function generate() {
@@ -60,20 +78,20 @@ class Documentator {
 
 
 	public function pushDocGroup( $base, $callable ) {
+		$page = $this->currentPage_->createChild( strtolower( basename( $base ) ), true );
+		$this->currentPage_ = $page;
+
 		$group = array( 
 			"path" => $base,
+			"page" => $page,
 		);
 		if ( $callable instanceof \Closure ) {
 			$block = $this->parseBlock( new \ReflectionFunction( $callable ) );
 			if ( $block ) {
-				$group["name"] = (string) $block->getSummary();
-				$group["description"] = (string) $block->getDescription();
+				$page->setTitle( (string) $block->getSummary() );
+				$page->setDescription( (string) $block->getDescription() );
 			}
 		}
-
-		$page = $this->currentPage_->createChild( $group["name"] ?: $group["path"] );
-		$this->currentPage_ = $page;
-		$group["page"] = $page;
 		
 		$this->groupPaths_[] = $base;
 		$this->groups_[] = (object) $group;

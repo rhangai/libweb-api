@@ -6,7 +6,11 @@ namespace libweb\api\docs;
  */
 interface GeneratorInterface {
 	/**
-	 * Generate the root page
+	 * Set options for generator
+	 */
+	function setOptions( array $options );
+	/**
+	 * Generate from the root page
 	 */
 	function generate( Page $root );
 }

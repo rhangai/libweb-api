@@ -14,6 +14,7 @@ class Markdown implements GeneratorInterface {
 		if ( !is_string( @$options["output"] ) )
 			throw new \InvalidArgumentException( "Missing generator option: 'output' => The output directory");
 		$this->outputDir_ = $options["output"];
+		$this->title_     = @$options["title"] ?: "API";
 	}
 
 	public function generate( $page ) {
@@ -28,6 +29,10 @@ class Markdown implements GeneratorInterface {
 			echo "Creating dir: ".$dirpath, "\n";
 			@mkdir( $dirpath, 0775, true );
 			$filename = "_index.md";
+			if ( $root ) {
+				$page = clone $page;
+				$page->setTitle( $this->title_ );
+			}
 		} else {
 			$dirpath = Path::join( $path );
 			$filename = $page->getName().".md";
@@ -40,9 +45,9 @@ class Markdown implements GeneratorInterface {
 		$file->fwrite( "\n=====================\n\n" );
 		$file->fwrite( $page->getDescription() );
 
-		foreach ( $page->getSectionList() as $section ) {
-			$file->fwrite( "\n\n### `".$section->name."` ###\n\n" );
-			$file->fwrite( $section->content );
+		foreach ( $page->getMethodList() as $method ) {
+			$file->fwrite( "\n\n### `".$method->path."` ###\n\n" );
+			$file->fwrite( $method->description );
 		}
 
 		if ( $page->isDirectory() ) {
@@ -51,5 +56,6 @@ class Markdown implements GeneratorInterface {
 		}
 	}
 
+	private $title_;
 	private $outputDir_;
 }

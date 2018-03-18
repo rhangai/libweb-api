@@ -46,15 +46,19 @@ class Page {
 	public function setDescription( $description ) {
 		$this->description_ = $description;
 	}
-	public function getSectionList() {
-		return $this->sectionList_;
+	public function getMethodList() {
+		return $this->methodList_;
 	}
-	public function addSection( $name, $content ) {
-		$section = array(
-			"name" => $name,
-			"content" => $content,
+	public function addMethod( $methods, $fullpath, $path, $reflection ) {
+		$method = (object) array(
+			"methods" => $methods,
+			"fullpath" => $fullpath,
+			"path" => $path,
+			"params" => null,
+			"description" => "",
 		);
-		$this->sectionList_[] = (object) $section;
+		$this->methodList_[] = $method;
+		return $method;
 	}
 
 	// Variables
@@ -66,5 +70,5 @@ class Page {
 	// Page variables
 	private $title_;
 	private $description_;
-	private $sectionList_ = array();
+	private $methodList_ = array();
 }

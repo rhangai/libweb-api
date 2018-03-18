@@ -33,22 +33,36 @@ class Documentator {
 		if ( $classBlock ) {
 			$page->setTitle( $classBlock->getSummary() );
 			$page->setDescription( $classBlock->getDescription() );
+		} else {
+			$page->setTitle( $page->getName() );
 		}
 		
 		foreach ( $reflectionClass->getMethods() as $method ) {
 			$methodName = $method->getName();
 			if ( !preg_match( "/^([A-Z]+)_(.+)$/", $methodName, $matches ) )
 				continue;
-			if ( !in_array( $matches[1], self::METHODS ) )
-				continue;
-
+				
+			$methodMethods = $matches[1];
 			$methodPath = $matches[2];
+			if ( $methodMethods === 'REQUEST' )
+				$methodMethods = self::METHODS;
+			else if ( in_array( $methodMethods, self::METHODS ) ) {
+				$methodMethods = array( $methodMethods );
+			} else {
+				continue;
+			}
+			
 			$methodPath = strtolower( preg_replace( "/([a-z])([A-Z])/", '$1-$2', $methodPath ) );
 			$methodPath = str_replace( "_", '/', $methodPath );
 			
 			$methodFullPath = Path::join( $fullpath, $methodPath );
-			$page->addSection( $methodPath, $method->getDocComment() );
+			$this->addInternalMethod( $page, $methodMethods, $fullpath, $methodPath, $method );
 		}
+	}
+
+	protected function addInternalMethod( $page, $methods, $fullpath, $path, $reflection ) {
+		$item = $page->addMethod( $methods, $fullpath, $path, $reflection );
+		$this->methods_[] = $item;
 	}
 	
 	public function addGenerator( $generator, $options = array() ) {
@@ -119,4 +133,5 @@ class Documentator {
 	private $groups_ = array();
 	private $groupPaths_ = array();
 	private $generators_ = array();
+	private $methods_ = array();
 }

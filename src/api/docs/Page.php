@@ -59,7 +59,8 @@ class Page {
 			"description" => null,
 			"body" => null,
 		);
-		$this->parseMethod( $method, $reflection );
+		if ( $reflection )
+			$this->parseMethod( $method, $reflection );
 		$this->methodList_[] = $method;
 		return $method;
 	}

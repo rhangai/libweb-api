@@ -20,6 +20,23 @@ class Documentator {
 	}
 
 	public function addMap( $methods, $route, $callable ) {
+		$reflection = null;
+		if ( $callable instanceof \Closure ) {
+			$reflection = new \ReflectionFunction( $callable );
+		} else if ( is_string( $callable ) ) {
+			@list( $class, $method ) = explode( ":", $callable, 2 );
+			if ( $method == null ) {
+				if ( function_exists( $class ) )
+					$reflection = new \ReflectionFunction( $class );
+			} else if ( class_exists( $class ) ) {
+				$reflectionClass = new \ReflectionClass( $class );
+				if ( $reflectionClass->hasMethod( $method ) )
+					$reflection = $reflectionClass->getMethod( $method );
+			}
+		}
+
+		$fullpath = Path::join( implode( "/", $this->groupPaths_ ), $route );
+		$this->addInternalMethod( $this->currentPage_, $methods, $fullpath, $route, $reflection );
 	}
 	public function addClass( $base, $class ) {
 		$fullpath = Path::join( implode( "/", $this->groupPaths_ ), $base );

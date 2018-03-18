@@ -44,10 +44,30 @@ class Markdown implements GeneratorInterface {
 		$file->fwrite( $page->getTitle() );
 		$file->fwrite( "\n=====================\n\n" );
 		$file->fwrite( $page->getDescription() );
-
+		$file->fwrite( "\n\n" );
+			
 		foreach ( $page->getMethodList() as $method ) {
-			$file->fwrite( "\n\n### `".$method->path."` ###\n\n" );
+			$file->fwrite( "### `".$method->path."` ###\n" );
+			$file->fwrite( $method->summary );
+			$file->fwrite( "\n\n" );
+
+			// Write method information
+			$file->fwrite( "- **Methods**: ".implode( ", ", $method->methods )."\n" );
+			$file->fwrite( "- **Endpoint**: `".$method->fullpath."`\n" );
+			//$file->fwrite( "- **Params**: \n" );
+
+			// Write description
+			$file->fwrite( "\n\n" );
 			$file->fwrite( $method->description );
+			$file->fwrite( "\n\n" );
+
+			// Code body
+			if ( $method->body ) {
+				$file->fwrite( "```php\n" );
+				$file->fwrite( $method->body );
+				$file->fwrite( "```" );
+				$file->fwrite( "\n\n" );
+			}
 		}
 
 		if ( $page->isDirectory() ) {

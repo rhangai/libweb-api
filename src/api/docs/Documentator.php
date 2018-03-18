@@ -17,7 +17,6 @@ class Documentator {
 	public function __construct() {
 		$this->root_ = new Page( null, true, null );
 		$this->currentPage_ = $this->root_;
-		$this->docParser_ = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
 	}
 
 	public function addMap( $methods, $route, $callable ) {
@@ -29,7 +28,7 @@ class Documentator {
 		$page = $this->currentPage_->createChild( strtolower( basename( $fullpath ) ) );
 
 		
-		$classBlock = $this->parseBlock( $reflectionClass );
+		$classBlock = self::parseBlock( $reflectionClass );
 		if ( $classBlock ) {
 			$page->setTitle( $classBlock->getSummary() );
 			$page->setDescription( $classBlock->getDescription() );
@@ -56,7 +55,7 @@ class Documentator {
 			$methodPath = str_replace( "_", '/', $methodPath );
 			
 			$methodFullPath = Path::join( $fullpath, $methodPath );
-			$this->addInternalMethod( $page, $methodMethods, $fullpath, $methodPath, $method );
+			$this->addInternalMethod( $page, $methodMethods, $methodFullPath, $methodPath, $method );
 		}
 	}
 
@@ -100,7 +99,7 @@ class Documentator {
 			"page" => $page,
 		);
 		if ( $callable instanceof \Closure ) {
-			$block = $this->parseBlock( new \ReflectionFunction( $callable ) );
+			$block = self::parseBlock( new \ReflectionFunction( $callable ) );
 			if ( $block ) {
 				$page->setTitle( (string) $block->getSummary() );
 				$page->setDescription( (string) $block->getDescription() );
@@ -115,13 +114,16 @@ class Documentator {
 		array_pop( $this->groups_ );
 		array_pop( $this->groupPaths_ );
 	}
-	public function parseBlock( $doc ) {
+	public static function parseBlock( $doc ) {
+		static $docParser = null;
+		if ( $docParser === null )
+			$docParser = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
 		if ( !$doc )
 			return null;
 		else if ( is_string( $doc ) ) 
-			return $this->docParser_->create( $doc );
+			return $docParser->create( $doc );
 		else if ( method_exists( $doc, 'getDocComment' ) )
-			return $this->parseBlock( $doc->getDocComment() );
+			return self::parseBlock( $doc->getDocComment() );
 		else
 			throw new \InvalidArgumentException( "Invalid block" );
 	}
@@ -129,7 +131,6 @@ class Documentator {
 	// Variables
 	private $root_;
 	private $currentPage_;
-	private $docParser ;
 	private $groups_ = array();
 	private $groupPaths_ = array();
 	private $generators_ = array();

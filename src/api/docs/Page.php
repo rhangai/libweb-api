@@ -55,10 +55,33 @@ class Page {
 			"fullpath" => $fullpath,
 			"path" => $path,
 			"params" => null,
-			"description" => "",
+			"summary" => null,
+			"description" => null,
+			"body" => null,
 		);
+		$this->parseMethod( $method, $reflection );
 		$this->methodList_[] = $method;
 		return $method;
+	}
+
+	protected function parseMethod( $method, $reflection ) {
+		$block = Documentator::parseBlock( $reflection );
+		if ( $block ) {
+			$method->summary = $block->getSummary();
+			$method->description = $block->getDescription();
+		}
+		$method->body = self::getMethodBody( $reflection );
+	}
+
+	protected static function getMethodBody( $reflection ) {
+		$filename = $reflection->getFileName();
+		$start_line = $reflection->getStartLine() - 1; // it's actually - 1, otherwise you wont get the function() block
+		$end_line = $reflection->getEndLine();
+		$length = $end_line - $start_line;
+		$source = file($filename);
+		$body = implode("", array_slice($source, $start_line, $length));
+		$body = str_replace( "\t", "  ", $body );
+		return $body;
 	}
 
 	// Variables

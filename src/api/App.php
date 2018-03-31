@@ -223,15 +223,18 @@ class App extends \Slim\App {
 	 * Enable CORS on the current application
 	 * @param $allowedOrigin The allowed origin for cors request
 	 */
-	public function cors( $allowedOrigin = '*' ) {
+	public function cors( $allowedOrigin = '*', $extraAllowedHeaders = array() ) {
 		if ( $this->corsEnabled_ )
 			return;
 		$this->corsEnabled_ = true;
-		$this->add(function( $request, $response, $next ) use ( $allowedOrigin ) {
+		if ( is_array( $extraAllowedHeaders ) )
+			$extraAllowedHeaders = implode( ", ", $extraAllowedHeaders );
+		$this->add(function( $request, $response, $next ) use ( $allowedOrigin, $extraAllowedHeaders ) {
 			$response = $next( $request, $response );
+			$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization', $extraAllowedHeaders );
 			return $response
 				->withHeader('Access-Control-Allow-Origin', $allowedOrigin )
-				->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+				->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
 				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 		});
 		parent::options( "/{route:.*}", function ($request, $response, $args) {

@@ -25,5 +25,5 @@
 		"maximebf/debugbar": "Provides better debug functionality",
 		"phpdocumentor/reflection-docblock": "Better generation of docs"
 	},
-	"version": "1.2.0"
+	"version": "1.2.1"
 }

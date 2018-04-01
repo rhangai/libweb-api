@@ -36,7 +36,7 @@ class Serializable implements \JsonSerializable {
 		} else if ( $item instanceof \Propel\Runtime\Collection\Collection )
 			return array( "items" => new SerializableIterator( $item, $type ) );
 		else if ( $item instanceof \Propel\Runtime\ActiveRecord\ActiveRecordInterface )
-			return  self::serialize( $item->toArray( $type ) );
+			return  self::serialize( $item->toArray( $type ), $type );
 		else if ( is_array( $item ) )
 			return new SerializableIterator( new \ArrayIterator( $item ), $type ) ;
 		else if ( is_object( $item ) ) {

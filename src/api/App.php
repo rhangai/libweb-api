@@ -13,6 +13,7 @@ class App extends \Slim\App {
 	 */
 	public function __construct( $container = array() ) {
 		parent::__construct( $container );
+
 		$container = $this->getContainer();
 		$container["request"] = function( $container ) {
 			return Request::createFromEnvironment( $container->get( 'environment' ) );
@@ -20,7 +21,22 @@ class App extends \Slim\App {
 		$container["response"] = function( $container ) {
 			$headers  = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
 			$response = new Response(200, $headers);
-			return $response->withProtocolVersion($container->get('settings')['httpVersion']);
+			$response = $response
+				->withProtocolVersion($container->get('settings')['httpVersion']);
+			if ( $this->cors_ ) {
+				$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization', $this->cors_->allowedHeaders );
+				$response = $response
+					->withHeader('Access-Control-Allow-Origin', $this->cors_->allowedOrigin )
+					->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
+					->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+			}
+			return $response;
+		};
+		$container['errorHandler'] = function ( $container ) {
+			return function ($request, $response, $exception) use ($container) {
+				$handlerResponse = $this->errorHandler( $request, $response, $exception );
+				return $handlerResponse ?: $response;
+			};
 		};
 	}
 	/**
@@ -32,7 +48,9 @@ class App extends \Slim\App {
 		if ( $generator !== null )
 			$this->documentator_->addGenerator( $generator, $options );
 	}
-	
+	// Error handler
+	public function errorHandler( $request, $response, $exception ) {
+	}
 	/**
 	 * Overrides application run
 	 */
@@ -42,8 +60,6 @@ class App extends \Slim\App {
 			echo "Documentation generated.\n";
 			return;
 		}
-		if ( $this->corsEnabled_ )
-			$this->corsRun_();
 		return parent::run( $silent );
 	}
 
@@ -224,37 +240,21 @@ class App extends \Slim\App {
 	 * @param $allowedOrigin The allowed origin for cors request
 	 */
 	public function cors( $allowedOrigin = '*', $extraAllowedHeaders = array() ) {
-		if ( $this->corsEnabled_ )
+		if ( $this->cors_ )
 			return;
-		$this->corsEnabled_ = true;
 		if ( is_array( $extraAllowedHeaders ) )
 			$extraAllowedHeaders = implode( ", ", $extraAllowedHeaders );
-		$this->add(function( $request, $response, $next ) use ( $allowedOrigin, $extraAllowedHeaders ) {
-			$response = $next( $request, $response );
-			$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization', $extraAllowedHeaders );
-			return $response
-				->withHeader('Access-Control-Allow-Origin', $allowedOrigin )
-				->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
-				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-		});
+		$this->cors_ = (object) array(
+			"allowedOrigin"  => $allowedOrigin,
+			"allowedHeaders" => $extraAllowedHeaders,
+		);
 		parent::options( "/{route:.*}", function ($request, $response, $args) {
-			return $response;
-		});
-	}
-	/**
-	 * Prepare the application for CORS
-	 */
-	private function corsRun_() {
-		$app = $this;
-		parent::map( ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], "/{route:.*}", function ($request, $response, $args) use ( $app ) {
-			$handler  = $app->getContainer()->notFoundHandler;
-			$response = $handler( $request, $response );
 			return $response;
 		});
 	}
 
 	// Variables
-	private $corsEnabled_ = false;
+	private $cors_ = false;
 	private $documentator_ = null;
 	private $docSkipNext_ = false;
 }

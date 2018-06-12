@@ -1,2 +1,4 @@
 # Composer
 /vendor/
+/yarn-error.log
+/node_modules/

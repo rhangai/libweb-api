@@ -228,9 +228,11 @@ class App extends \Slim\App {
 			try { 
 				$data = call_user_func_array( $callable, $args );
 				$error = false;
-			} catch ( \Exception $e ) {
-				$data = $e;
+			} catch ( \Exception $exception ) {
+				$data = $exception;
 				$error = true;
+				$handlerResponse = $app->errorHandler( $request, $response, $exception );
+				$response = $handlerResponse ?: $response;
 			}
 			return $app->formatResponse( $request, $response, $params, $data, $error );
 		};

@@ -60,6 +60,13 @@ class App extends \Slim\App {
 			echo "Documentation generated.\n";
 			return;
 		}
+		// Handler for everything else
+		if ( $this->cors_ ) {
+			$this->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {
+				$handler = $this->notFoundHandler;
+				return $handler($req, $res);
+			});
+		}
 		return parent::run( $silent );
 	}
 

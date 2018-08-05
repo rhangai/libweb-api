@@ -16,6 +16,9 @@ trait AppGraphql {
 	 */
 	public function graphql( $uri, array $options ) {
 		$handler = function( $req, $res ) use ( $options ) {
+			if ( is_callable( $options ) )
+				$options = (array) call_user_func( $options, $req, $res );
+
 			$schema = $options["schema"];
 			if ( is_callable( $schema ) )
 				$schema = call_user_func( $schema, $req, $res );

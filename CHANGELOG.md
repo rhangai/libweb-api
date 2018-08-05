@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.2"></a>
+## [1.4.2](https://github.com/renanhangai/libweb-api/compare/v1.4.1...v1.4.2) (2018-08-05)
+
+
+### Bug Fixes
+
+* **graphql:** Parameter when calling graphql options ([d236401](https://github.com/renanhangai/libweb-api/commit/d236401))
+
+
+
 <a name="1.4.1"></a>
 ## [1.4.1](https://github.com/renanhangai/libweb-api/compare/v1.4.0...v1.4.1) (2018-08-05)
 

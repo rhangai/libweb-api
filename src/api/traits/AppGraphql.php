@@ -14,10 +14,11 @@ trait AppGraphql {
 	 * @param $options["context"] The context for the graphql
 	 * @param $options["rootValue"] The value to pass to the root
 	 */
-	public function graphql( $uri, array $options ) {
+	public function graphql( $uri, $options ) {
 		$handler = function( $req, $res ) use ( $options ) {
 			if ( is_callable( $options ) )
-				$options = (array) call_user_func( $options, $req, $res );
+				$options = call_user_func( $options, $req, $res );
+			$options = (array) $options;
 
 			$schema = $options["schema"];
 			if ( is_callable( $schema ) )

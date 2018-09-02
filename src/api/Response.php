@@ -1,8 +1,10 @@
 <?php
 namespace libweb\api;
 
-use \Violet\StreamingJsonEncoder\BufferJsonEncoder;
-use \Violet\StreamingJsonEncoder\JsonStream;
+use Violet\StreamingJsonEncoder\BufferJsonEncoder;
+use Violet\StreamingJsonEncoder\JsonStream;
+use Dflydev\FigCookies\FigRequestCookies;
+use Dflydev\FigCookies\SetCookie;
 
 /**
  * Response class
@@ -67,5 +69,36 @@ class Response extends \Slim\Http\Response {
 		$stream = fopen( "php://temp", "rw+" );
 		fwrite( $stream, $buffer );
 		return $this->withDownload( $stream, $filename, $contentType, $mode );
+	}
+	/**
+	 * Set a cookie as a response
+	 * @param $key The key of the cookie
+	 * @param $value The value for the cookie
+	 * @param array $options The array of options for the cookie
+	 * @param string $options["domain"]
+	 * @param boolean $options["secure"]
+	 * @param boolean $options["httponly"]
+	 */
+	public function withCookie( $key, $value, $options = array() ) {
+		$cookie = SetCookie::create( $key )
+			->withValue( $value );
+		if ( isset( $options["domain" ] ) )
+			$cookie = $cookie->withDomain( $options["domain"] );
+		if ( isset( $options["secure" ] ) )
+			$cookie = $cookie->withSecure( $options["secure" ] );
+		if ( isset( $options["httponly" ] ) )
+			$cookie = $cookie->withHttpOnly( $options["httponly" ] );
+		return FigRequestCookies::set( $this, $cookie );
+	}
+	/**
+	 * Set multiple cookies as response
+	 * @param $cookies Array of cookies to be set
+	 * @param $options Options for every cookie
+	 */
+	public function withCookies( $cookies, $options = array() ) {
+		$response = $this;
+		foreach ( $cookies as $key => $value )
+			$response = $response->withCookie( $key, $value, $options );
+		return $response;
 	}
 }

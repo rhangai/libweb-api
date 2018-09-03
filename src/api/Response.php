@@ -24,6 +24,12 @@ class Response extends \Slim\Http\Response {
 		return $clone;
 	}
 	/**
+	 * Set the response as it would usually be if data was returned
+	 */
+	public function withResponse( $data, $error = false ) {
+		return $this->_app->formatResponse( $this->_app->getContainer()->request, $this, [], $data, $error );
+	}
+	/**
 	 * Send a json
 	 */
 	public function withJson( $data, $status = null, $encodingOptions = 0 ) {

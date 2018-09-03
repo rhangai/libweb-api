@@ -16,21 +16,10 @@ class App extends \Slim\App {
 
 		$container = $this->getContainer();
 		$container["request"] = function( $container ) {
-			return Request::createFromEnvironment( $container->get( 'environment' ) );
+			return $this->createRequest( $container );
 		};
 		$container["response"] = function( $container ) {
-			$headers  = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
-			$response = new Response(200, $headers);
-			$response = $response
-				->withProtocolVersion($container->get('settings')['httpVersion']);
-			if ( $this->cors_ ) {
-				$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization', $this->cors_->allowedHeaders );
-				$response = $response
-					->withHeader('Access-Control-Allow-Origin', $this->cors_->allowedOrigin )
-					->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
-					->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-			}
-			return $response;
+			return $this->createResponse( $container );
 		};
 		$container['errorHandler'] = function ( $container ) {
 			return function ($request, $response, $exception) use ($container) {
@@ -38,6 +27,26 @@ class App extends \Slim\App {
 				return $handlerResponse ?: $response;
 			};
 		};
+	}
+	/// Create the response
+	public function createRequest( $container ) {
+		return Request::createFromEnvironment( $container->get( 'environment' ) );
+	}
+	/// Create the request
+	public function createResponse( $container ) {
+		$headers  = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
+		$response = new Response(200, $headers);
+		$response = $response
+			->withApp( $this )
+			->withProtocolVersion($container->get('settings')['httpVersion']);
+		if ( $this->cors_ ) {
+			$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization', $this->cors_->allowedHeaders );
+			$response = $response
+				->withHeader('Access-Control-Allow-Origin', $this->cors_->allowedOrigin )
+				->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
+				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+		}
+		return $response;
 	}
 	/**
 	 * Make the app documentate itself

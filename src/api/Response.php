@@ -12,6 +12,18 @@ use Dflydev\FigCookies\SetCookie;
 class Response extends \Slim\Http\Response {
 
 	/**
+	 * Get the application
+	 */
+	public function getApp() { return $this->_app; }
+	/**
+	 * Set the application on the response
+	 */
+	public function withApp( $app ) {
+		$clone = clone $this;
+		$clone->_app = $app;
+		return $clone;
+	}
+	/**
 	 * Send a json
 	 */
 	public function withJson( $data, $status = null, $encodingOptions = 0 ) {
@@ -101,4 +113,7 @@ class Response extends \Slim\Http\Response {
 			$response = $response->withCookie( $key, $value, $options );
 		return $response;
 	}
+
+	/// The application
+	private $_app = null;
 }

@@ -3,7 +3,7 @@ namespace libweb\api;
 
 use Violet\StreamingJsonEncoder\BufferJsonEncoder;
 use Violet\StreamingJsonEncoder\JsonStream;
-use Dflydev\FigCookies\FigRequestCookies;
+use Dflydev\FigCookies\FigResponseCookies;
 use Dflydev\FigCookies\SetCookie;
 
 /**
@@ -106,7 +106,7 @@ class Response extends \Slim\Http\Response {
 			$cookie = $cookie->withSecure( $options["secure" ] );
 		if ( isset( $options["httponly" ] ) )
 			$cookie = $cookie->withHttpOnly( $options["httponly" ] );
-		return FigRequestCookies::set( $this, $cookie );
+		return FigResponseCookies::set( $this, $cookie );
 	}
 	/**
 	 * Set multiple cookies as response

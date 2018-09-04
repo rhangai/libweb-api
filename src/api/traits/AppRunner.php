@@ -52,6 +52,9 @@ trait AppRunner {
 	 * Get configuration to run the app
 	 */
 	public static function config( $argv ) {
-		return [];
+		return [
+			"debug" => false,
+			"logErrors" => true,
+		];
 	}
 };

@@ -21,12 +21,12 @@ class App extends \Slim\App {
 		$container["response"] = function( $container ) {
 			return $this->createResponse( $container );
 		};
-		$container['errorHandler'] = function ( $container ) {
-			return function ($request, $response, $exception) use ($container) {
-				$handlerResponse = $this->errorHandler( $request, $response, $exception );
+		$container->extend( 'errorHandler', function ( $defaultHandler, $container ) {
+			return function ($request, $response, $exception) use ( $defaultHandler, $container ) {
+				$handlerResponse = $this->errorHandler( $request, $response, $exception, $defaultHandler );
 				return $handlerResponse ?: $response;
 			};
-		};
+		} );
 	}
 	/// Create the response
 	public function createRequest( $container ) {
@@ -58,7 +58,8 @@ class App extends \Slim\App {
 			$this->documentator_->addGenerator( $generator, $options );
 	}
 	// Error handler
-	public function errorHandler( $request, $response, $exception ) {
+	public function errorHandler( $request, $response, $exception, $defaultHandler ) {
+		return $defaultHandler( $request, $response, $exception );
 	}
 	/**
 	 * Overrides application run
@@ -247,8 +248,6 @@ class App extends \Slim\App {
 			} catch ( \Exception $exception ) {
 				$data = $exception;
 				$error = true;
-				$handlerResponse = $app->errorHandler( $request, $response, $exception );
-				$response = $handlerResponse ?: $response;
 			}
 			return $app->formatResponse( $request, $response, $params, $data, $error );
 		};

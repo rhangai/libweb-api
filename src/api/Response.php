@@ -99,7 +99,8 @@ class Response extends \Slim\Http\Response {
 	 */
 	public function withCookie( $key, $value, $options = array() ) {
 		$cookie = SetCookie::create( $key )
-			->withValue( $value );
+			->withValue( $value )
+			->withPath( isset( $options["path"] ) ? $options["path"] : "/" );
 		if ( isset( $options["domain" ] ) )
 			$cookie = $cookie->withDomain( $options["domain"] );
 		if ( isset( $options["secure" ] ) )

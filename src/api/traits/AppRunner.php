@@ -29,7 +29,7 @@ trait AppRunner {
 	 * A main function to run on the main script
 	 */
 	public static function main( $argv ) {
-		$app = static::create( self::config( $argv ) );
+		$app = static::create( static::config( $argv ) );
 		$app->run();
 	}
 	/**

@@ -31,7 +31,16 @@ trait AppGraphql {
 	
 			$query     = $req->getParam( "query" );
 			$variables = $req->getParam( "variables" );
-			$result = \GraphQL\GraphQL::executeQuery( $schema, $query, @$options["rootValue"], $context, (array) $variables );
+			$result = \GraphQL\GraphQL::executeQuery( 
+				$schema, 
+				$query, 
+				@$options["rootValue"], 
+				$context, 
+				(array) $variables, 
+				@$options[ "operationName" ], 
+				@$options[ "fieldResolver" ],
+				@$options[ "validationRules" ]
+			);
 
 			$flags = 0;
 			if ( $this->getContainer()["settings"]["displayErrorDetails"] )

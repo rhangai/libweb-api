@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/renanhangai/libweb-api/compare/v1.6.3...v2.0.0) (2018-09-04)
+
+
+### Bug Fixes
+
+* Changed config call to static ([0cad5ab](https://github.com/renanhangai/libweb-api/commit/0cad5ab))
+
+
+### Chores
+
+* Added default handler for errors as parameter ([451aa7c](https://github.com/renanhangai/libweb-api/commit/451aa7c))
+
+
+### BREAKING CHANGES
+
+* The error handler will now have a new parameter so changing the signature of the method
+
+
+
 <a name="1.6.3"></a>
 ## [1.6.3](https://github.com/renanhangai/libweb-api/compare/v1.6.2...v1.6.3) (2018-09-04)
 

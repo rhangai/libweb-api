@@ -35,11 +35,18 @@ trait AppRunner {
 	/**
 	 * Set the error handler
 	 */
-	public function errorHandler( $request, $response, $exception ) {
+	public function errorHandler( $request, $response, $exception, $defaultHandler ) {
 		if ( $this->getContainer()["settings"]["logErrors"] )
 			error_log( $exception );
 		$response = $response->withStatus( 500 );
-		return $this->formatResponse( $request, $response, null, $exception, true );
+		try {
+			return $this->formatResponse( $request, $response, null, $exception, true );
+		} catch( \Exception $exception ) {
+			// Does not send anything on error
+			if ( !$this->getContainer()["settings"]["displayErrorDetails"] )
+				return $response->withJson([ "status" => "error" ]);
+			return $defaultHandler( $request, $response, $exception );
+		}
 	}
 	/**
 	 * Get configuration to run the app

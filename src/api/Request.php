@@ -19,4 +19,11 @@ class Request extends \Slim\Http\Request {
 	public function getValidatedParams( $validator ) {
 		return v::validate( $this->getParams(), $validator );
 	}
+	/**
+	 * Get the validated parameters from the request with uploaded files using a validator 
+	 */
+	public function getValidatedParamsWithUpload( $validator ) {
+		$params = array_merge( $this->getParams(), $this->getUploadedFiles() );
+		return v::validate( $params, $validator );
+	}
 }

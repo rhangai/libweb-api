@@ -18,7 +18,17 @@ trait AppGraphql {
 		$handler = function( $req, $res ) use ( $options ) {
 			if ( is_callable( $options ) )
 				$options = call_user_func( $options, $req, $res );
-			$options = (array) $options;
+
+			if ( is_object( $options ) ) {
+				if ( $options instanceof \GraphQL\Type\Schema )
+					$options = [ "schema" => $options ];
+				else if ( $options instanceof \GraphQL\Type\Definition\Type )
+					$options = [ "schema" => new \GraphQL\Type\Schema([ "query" => $options ]) ];
+				else
+					throw new \LogicException( "Invalid type for options on graphql method. Must be an array, a type or an schema." );
+			} else if ( !is_array( $options ) ) {
+				throw new \LogicException( "Invalid type for options on graphql method. Must be an array, a type or an schema." );
+			}
 
 			$schema = $options["schema"];
 			if ( is_callable( $schema ) )
@@ -27,6 +37,8 @@ trait AppGraphql {
 			$context = @$options["context"];
 			if ( is_callable( $context ) )
 				$context = call_user_func( $context, $req, $res );
+			if ( !$context && ( $context !== false ) )
+				$context = new \libweb\api\graphql\Context( $req, $res );
 	
 	
 			$query     = $req->getParam( "query" );

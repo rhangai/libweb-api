@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/renanhangai/libweb-api/compare/v2.0.0...v2.2.0) (2018-11-16)
+
+
+### Features
+
+* Added getValidatedParamsWithUpload on the request ([60abc61](https://github.com/renanhangai/libweb-api/commit/60abc61))
+* Added sugar handler of graphql function params ([051d594](https://github.com/renanhangai/libweb-api/commit/051d594))
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/renanhangai/libweb-api/compare/v2.0.0...v2.1.0) (2018-10-17)
 

@@ -26,4 +26,12 @@ class Request extends \Slim\Http\Request {
 		$params = array_merge( $this->getParams(), $this->getUploadedFiles() );
 		return v::validate( $params, $validator );
 	}
+	/**
+	 * Get the attribute directly using a shortcut
+	 */
+	public function __get($name) {
+		if ( !$this->attributes->has( $name ) )
+			throw new \InvalidArgumentException( "Attribute $name does not exist" );
+		return $this->attributes->get($name);
+	}
 }

@@ -32,6 +32,11 @@ class Request extends \Slim\Http\Request {
 	public function __get($name) {
 		if ( !$this->attributes->has( $name ) )
 			throw new \InvalidArgumentException( "Attribute $name does not exist" );
-		return $this->attributes->get($name);
+		$attr = $this->attributes->get($name);
+		if ( $attr instanceof \Closure ) {
+			$attr = call_user_func( $attr, $this );
+			$this->attributes->set($name, $attr);
+		}
+		return $attr;
 	}
 }

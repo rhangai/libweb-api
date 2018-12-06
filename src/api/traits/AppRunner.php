@@ -12,6 +12,9 @@ trait AppRunner {
 	public function setupRoutes() {}
 	/**
 	 * Create the app
+	 * @param array $config The configuration
+	 * "debug": Whether or not turn on debug methods
+	 * "logErrors": Wheter the lib should log the errors
 	 */
 	public static function create( $config = array() ) {
 		$app = new static([

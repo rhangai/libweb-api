@@ -7,6 +7,9 @@ use libweb\api\docs\GeneratorInterface;
 use Webmozart\PathUtil\Path;
 
 class App extends \Slim\App {
+	/// CLasses for
+	const REQUEST_CLASS = Request::class;
+	const RESPONSE_CLASS = Response::class;
 
 	/**
 	 * Construct the app using default response and request objects
@@ -30,12 +33,14 @@ class App extends \Slim\App {
 	}
 	/// Create the response
 	public function createRequest( $container ) {
-		return Request::createFromEnvironment( $container->get( 'environment' ) );
+		$requestClass = static::REQUEST_CLASS;
+		return $requestClass::createFromEnvironment( $container->get( 'environment' ) );
 	}
 	/// Create the request
 	public function createResponse( $container ) {
+		$responseClass = static::RESPONSE_CLASS;
 		$headers  = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
-		$response = new Response(200, $headers);
+		$response = new $responseClass(200, $headers);
 		$response = $response
 			->withApp( $this )
 			->withProtocolVersion($container->get('settings')['httpVersion']);

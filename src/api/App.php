@@ -87,6 +87,7 @@ class App extends \Slim\App {
 
 	/**
 	 * Group functions by route
+	 * @return \Slim\Interfaces\RouteGroupInterface
 	 */
 	public function group( $base, $callback ) {
 		if ( $this->documentator_ )
@@ -97,7 +98,10 @@ class App extends \Slim\App {
 		return $ret;
 	}
 
-	// Overrides the map function to wrap the handler
+	/**
+	 * 
+	 * @return \Slim\Interfaces\RouteInterface
+	 */
 	public function map( array $methods, $pattern, $callable ) {
 		if ( $this->documentator_ ) {
 			if ( !$this->docSkipNext_ )
@@ -111,7 +115,7 @@ class App extends \Slim\App {
 	 * @param $base The base path to load
 	 * @param $dir The directory to resolve
 	 * @param $classTemplate The template string for the class to resolve
-	 * @return {\Slim\Route} The root route for the base path
+	 * @return \Slim\Interfaces\RouteInterface The root route for the base path
 	 * 
 	 * Every path will be mapped to a file
 	 * Ex:
@@ -152,7 +156,7 @@ class App extends \Slim\App {
 	 * @param $base The base path to load
 	 * @param $dir The directory to resolve (If null, no new files will be included )
 	 * @param $classTemplate The template string for the class to resolve
-	 * @return {\Slim\Route} The root route for the base path
+	 * @return \Slim\Interfaces\RouteInterface The root route for the base path
 	 * 
 	 * Every path will be mapped to a file
 	 * Ex:
@@ -260,6 +264,7 @@ class App extends \Slim\App {
 	/**
 	 * Enable CORS on the current application
 	 * @param $allowedOrigin The allowed origin for cors request
+	 * @return null
 	 */
 	public function cors( $allowedOrigin = '*', $extraAllowedHeaders = array() ) {
 		if ( $this->cors_ )

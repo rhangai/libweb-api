@@ -7,12 +7,20 @@ namespace libweb\api\traits;
 trait AppGraphql {
 
 	/**
-	 * Add GraphQL handlers for the current uri
-	 * 
+	 * Add GraphQL handlers for the current uri2.
+	 *
 	 * @param string $uri The path URI for the handler
-	 * @param $options["schema"] The schema to run the graphql
-	 * @param $options["context"] The context for the graphql
-	 * @param $options["rootValue"] The value to pass to the root
+	 * @param mixed $options Mixed Options
+	 *    When an array
+	 *      ["schema"] => The schema to run the graphql
+	 *      ["context"] => The context for the graphql
+	 *      ["rootValue"] => See \GraphQL\GraphQL::executeQuery
+	 *      ["operationName"] => See \GraphQL\GraphQL::executeQuery
+	 *      ["fieldResolver"] => See \GraphQL\GraphQL::executeQuery
+	 *      ["validationRules"] => See \GraphQL\GraphQL::executeQuery
+	 *    When \GraphQL\Type\Schema the "schema" will be set to this option
+	 *    When \GraphQL\Type\Definition\Type will create a Schema(["query" => ...]) and use it as schema
+	 *    When callable, may return any of the above
 	 */
 	public function graphql( $uri, $options ) {
 		$handler = function( $req, $res ) use ( $options ) {

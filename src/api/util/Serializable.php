@@ -6,43 +6,27 @@ namespace libweb\api\util;
  */
 class Serializable implements \JsonSerializable {
 
-	const DEFAULT_PROPEL_TYPE = "fieldName";
-
 	/**
 	 * @param $item The item to be serialized
 	 * @param $propelType The propel type for serialization
 	 */
-	public function __construct( $item, $propelType = self::DEFAULT_PROPEL_TYPE ) {
+	public function __construct( $item ) {
 		$this->item_ = $item;
-		$this->type_ = $propelType;
 	}
 	/// Perform the serialization
 	public function jsonSerialize() {
-		return self::serialize( $this->item_, $this->type_ );
+		return self::serialize( $this->item_ );
 	}
 	/// Serialize some common types
-	public static function serialize( $item, $type ) {
+	public static function serialize( $item ) {
 		if ( $item instanceof \JsonSerializable )
-			return self::serialize( $item->jsonSerialize(), $type );
-		else if ( $item instanceof \Propel\Runtime\Util\PropelModelPager ) {
-			return array( 
-				"page_current"  => $item->getPage(),
-				"page_total"    => $item->getLastPage(),
-				"index_first"   => $item->getFirstIndex(),
-				"index_last"    => $item->getLastIndex(),
-				"total" => $item->getNbResults(),
-				"items" => new SerializableIterator( $item, $type ),
-			);
-		} else if ( $item instanceof \Propel\Runtime\Collection\Collection )
-			return array( "items" => new SerializableIterator( $item, $type ) );
-		else if ( $item instanceof \Propel\Runtime\ActiveRecord\ActiveRecordInterface )
-			return  self::serialize( $item->toArray( $type ), $type );
+			return $item;
 		else if ( is_array( $item ) )
-			return new SerializableIterator( new \ArrayIterator( $item ), $type ) ;
+			return $item;
 		else if ( is_object( $item ) ) {
 			if ( !($item instanceof \stdClass ) )
 				throw new \Exception( "Object cannot be serialized" );
-			return new SerializableIterator( $item, $type );
+			return $item;
 		}
 		return $item;
 	}

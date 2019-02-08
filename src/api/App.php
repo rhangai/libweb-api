@@ -45,10 +45,11 @@ class App extends \Slim\App {
 			->withApp( $this )
 			->withProtocolVersion($container->get('settings')['httpVersion']);
 		if ( $this->cors_ ) {
-			$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization', $this->cors_->allowedHeaders );
+			$allowedHeaders = array( 'X-Requested-With, Content-Type, Accept, Origin, Authorization, Set-Cookie', $this->cors_->allowedHeaders );
 			$response = $response
 				->withHeader('Access-Control-Allow-Origin', $this->cors_->allowedOrigin )
 				->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
+				->withHeader('Access-Control-Allow-Credentials', 'true' )
 				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 		}
 		return $response;
@@ -99,7 +100,7 @@ class App extends \Slim\App {
 	}
 
 	/**
-	 * 
+	 * PUT
 	 * @return \Slim\Interfaces\RouteInterface
 	 */
 	public function map( array $methods, $pattern, $callable ) {

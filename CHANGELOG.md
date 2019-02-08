@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.4.2"></a>
+## [2.4.2](https://github.com/renanhangai/libweb-api/compare/v2.4.1...v2.4.2) (2019-02-08)
+
+
+### Bug Fixes
+
+* Credentials when using cors ([52b9b1a](https://github.com/renanhangai/libweb-api/commit/52b9b1a))
+
+
+
 <a name="2.4.1"></a>
 ## [2.4.1](https://github.com/renanhangai/libweb-api/compare/v2.4.0...v2.4.1) (2018-12-07)
 

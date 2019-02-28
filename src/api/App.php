@@ -50,7 +50,8 @@ class App extends \Slim\App {
 				->withHeader('Access-Control-Allow-Origin', $this->cors_->allowedOrigin )
 				->withHeader('Access-Control-Allow-Headers', implode( ", ", $allowedHeaders ) )
 				->withHeader('Access-Control-Allow-Credentials', 'true' )
-				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+				->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+				->withHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length' );
 		}
 		return $response;
 	}

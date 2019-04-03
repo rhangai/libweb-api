@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.5.0"></a>
+# [2.5.0](https://github.com/renanhangai/libweb-api/compare/v2.4.2...v2.5.0) (2019-04-03)
+
+
+### Bug Fixes
+
+* Added CORS expose headers ([edf80a2](https://github.com/renanhangai/libweb-api/commit/edf80a2))
+
+
+### Features
+
+* New withFile e withString methods for response ([3742953](https://github.com/renanhangai/libweb-api/commit/3742953))
+
+
+
 <a name="2.4.2"></a>
 ## [2.4.2](https://github.com/renanhangai/libweb-api/compare/v2.4.1...v2.4.2) (2019-02-08)
 

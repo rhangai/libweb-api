@@ -51,33 +51,50 @@ class Response extends \Slim\Http\Response {
 			->withHeader( "Content-Disposition", $mode.'; filename="'.rawurlencode($filename).'"' );
 	}
 	/**
-	 * Create a response with a download
-	 * @param $file The stream
+	 * Create a response with a file
+	 * @param $file The filepath or file descriptor
+	 * @return $this
 	 */
-	public function withDownload( $file, $filename = null, $contentType = null, $mode = "attachment" ) {
+	public function withFile( $file, $contentType = null ) {
 		$body = null;
 		if ( is_resource( $file ) ) {
 			$body = new \Slim\Http\Body( $file );
 		} else if ( is_string( $file ) ) {
 			$body = new \Slim\Http\Body( fopen( $file, "rb" ) );
-			if ( $filename === null )
-				$filename = basename( $file );
 			if ( ( $contentType === null ) && function_exists( 'mime_content_type' ) )
 				$contentType = mime_content_type( $file );
 		} else {
 			throw new \InvalidArgumentException( "Download parameter must be a stream or a path to a file" );
 		}
-		
-		// Create a dummy filename
-		if ( $filename === null )
-			$filename = "download";
 			
 		// Make the response
 		$response = $this;
-		$response = $response->withContentDisposition( $filename, $mode );
 		if ( ( $contentType !== null ) && ( $contentType !== false ) )
 			$response = $response->withHeader( "Content-Type", $contentType );
 		return $response->withBody( $body );
+	}
+	/**
+	 * Create a response with a string
+	 * @param $buffer The buffer
+	 * @return $this
+	 */
+	public function withString( $buffer, $contentType = null ) {
+		$stream = fopen( "php://temp", "rw+" );
+		fwrite( $stream, $buffer );
+		return $this->withFile( $buffer, $contentType );
+	}
+	/**
+	 * Create a response with a download
+	 * @param $file The stream
+	 */
+	public function withDownload( $file, $filename = null, $contentType = null, $mode = "attachment" ) {
+		if ( is_string( $file ) && $filename === null )
+			$filename = basename( $file );
+		if ( $filename === null )
+			$filename = "download";
+		return $this
+			->withContentDisposition( $filename, $mode )
+			->withFile( $file );
 	}
 	/**
 	 * Create a response with a download string

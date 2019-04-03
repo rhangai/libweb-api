@@ -60,3 +60,29 @@ Methods
 	$obj = new \myproject\api\test\user\BooksAPI( $app );
 	$obj->GET_data()
 	```
+
+### Request
+
+- `getValidatedParam( $name, $rule )`
+- `getValidatedParams( $rules )`
+   ```php
+   $data = $req->getValidatedParams([
+        "name" => v::s(),
+        "list" => v::arrayOf([
+            "id" => v::i(),
+            "level?" => v::set(["N","R","W"]),
+        ]),
+    ]);
+    ```
+- `getValidatedParamsWithUpload( $rules )`
+
+### Response
+
+- `withFile( $file, $contentType = null )`
+- `withString( $buffer, $contentType = null )`
+- `withDownload( $file, $filename = null, $contentType = null, $mode = "attachment" )`
+- `withDownloadString( $buffer, $filename, $contentType = null, $mode = "attachment" )`
+- `withCookie( $key, $value, $options = array() )`
+- `withCookies( $cookies, $options = array() )`
+- `withJson( $data, $status = null )`
+- `withResponse( $data )`

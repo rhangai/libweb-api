@@ -63,6 +63,8 @@ Methods
 
 ### Request
 
+Inherits from [\Slim\Http\Request](http://www.slimframework.com/docs/v3/objects/request.html)
+
 - `getValidatedParam( $name, $rule )`
 - `getValidatedParams( $rules )`
    ```php
@@ -77,6 +79,8 @@ Methods
 - `getValidatedParamsWithUpload( $rules )`
 
 ### Response
+
+Inherits from [\Slim\Http\Response](http://www.slimframework.com/docs/v3/objects/response.html)
 
 - `withFile( $file, $contentType = null )`
 - `withString( $buffer, $contentType = null )`

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.5.1"></a>
+## [2.5.1](https://github.com/renanhangai/libweb-api/compare/v2.5.0...v2.5.1) (2019-04-25)
+
+
+### Bug Fixes
+
+* withDownload contentType was not being used ([278719d](https://github.com/renanhangai/libweb-api/commit/278719d))
+
+
+
 <a name="2.5.0"></a>
 # [2.5.0](https://github.com/renanhangai/libweb-api/compare/v2.4.2...v2.5.0) (2019-04-03)
 

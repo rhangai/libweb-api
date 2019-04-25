@@ -94,7 +94,7 @@ class Response extends \Slim\Http\Response {
 			$filename = "download";
 		return $this
 			->withContentDisposition( $filename, $mode )
-			->withFile( $file );
+			->withFile( $file, $contentType );
 	}
 	/**
 	 * Create a response with a download string

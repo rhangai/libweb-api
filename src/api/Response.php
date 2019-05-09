@@ -81,7 +81,7 @@ class Response extends \Slim\Http\Response {
 	public function withString( $buffer, $contentType = null ) {
 		$stream = fopen( "php://temp", "rw+" );
 		fwrite( $stream, $buffer );
-		return $this->withFile( $buffer, $contentType );
+		return $this->withFile( $stream, $contentType );
 	}
 	/**
 	 * Create a response with a download

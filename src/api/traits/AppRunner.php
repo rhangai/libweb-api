@@ -19,6 +19,7 @@ trait AppRunner {
 	public static function create( $config = array() ) {
 		$app = new static([
 			"settings" => [
+				"debug" =>!!@$config["debug"],
 				"displayErrorDetails" => !!@$config[ "debug" ],
 				"logErrors" => !!@$config[ "logErrors" ],
 			],

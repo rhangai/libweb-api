@@ -25,7 +25,8 @@ trait AppGraphql
 	 */
 	public function graphql($uri, $options)
 	{
-		$handler = function ($req, $res) use ($options) {
+		// Get the options according to the request
+		$getOptions = function ($req, $res) use ($options) {
 			if (is_callable($options))
 				$options = call_user_func($options, $req, $res);
 
@@ -39,6 +40,12 @@ trait AppGraphql
 			} else if (!is_array($options)) {
 				throw new \LogicException("Invalid type for options on graphql method. Must be an array, a type or an schema.");
 			}
+			return $options;
+		};
+
+		// Default Graphql Handler
+		$handler = function ($req, $res) use ($getOptions) {
+			$options = $getOptions($req, $res);
 
 			$schema = $options["schema"];
 			if (is_callable($schema))
@@ -72,17 +79,22 @@ trait AppGraphql
 			return $res->withJson($responseData);
 		};
 
-		$this->get($uri, function ($req, $res) use ($options, $handler) {
-			$isDebug = !!@$this->get('settings')['debug'];
+		// Get handler
+		$this->post($uri, $handler);
+		$this->get($uri, function ($req, $res) use ($getOptions, $handler) {
+			$options = $getOptions($req, $res);
+			// Use playground if requested
+			$isDebug = !!@$this->getContainer()->get('settings')['debug'];
 			if ((@$options["playground"] !== false) && $isDebug) {
 				$accept = $req->getHeaderLine('accept');
 				if (strpos($accept, 'text/html') !== false) {
+					// Send the playground
 					$content = file_get_contents(dirname(__DIR__) . '/graphql/Playground.html.template');
 					$playgroundOptions = $options['playground'];
 					if (is_string($playgroundOptions)) {
 						$playgroundOptions = ["endpoint" => $playgroundOptions];
 					} else if (!is_object($playgroundOptions)) {
-						$playgroundOptions = ["endpoint" => $req->getUri()];
+						$playgroundOptions = ["endpoint" => (string) $req->getUri()];
 					}
 					$content = str_replace('{{options}}', json_encode($playgroundOptions), $content);
 					return $res->withString($content, "text/html");
@@ -90,7 +102,6 @@ trait AppGraphql
 			}
 			return $handler($req, $res);
 		});
-		$this->post($uri, $handler);
 		return $this;
 	}
 }

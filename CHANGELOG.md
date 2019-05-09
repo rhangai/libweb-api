@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.6.0"></a>
+# [2.6.0](https://github.com/renanhangai/libweb-api/compare/v2.5.1...v2.6.0) (2019-05-09)
+
+
+### Bug Fixes
+
+* Graphql playground options were not being properly set ([175ed59](https://github.com/renanhangai/libweb-api/commit/175ed59))
+* withString response method was not working ([ca200f4](https://github.com/renanhangai/libweb-api/commit/ca200f4))
+
+
+### Features
+
+* Added graphql-playground ([71c20d4](https://github.com/renanhangai/libweb-api/commit/71c20d4))
+
+
+
 <a name="2.5.1"></a>
 ## [2.5.1](https://github.com/renanhangai/libweb-api/compare/v2.5.0...v2.5.1) (2019-04-25)
 

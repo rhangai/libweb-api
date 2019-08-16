@@ -13,6 +13,7 @@ class App extends \Slim\App {
 	const ATTRIBUTE_CONTAINER = 'container';
 
 	/// Di Container
+	/** @var \Psr\Container\ContainerInterface */
 	private $diContainer;
 
 	/**
@@ -36,9 +37,18 @@ class App extends \Slim\App {
 				return $handlerResponse ?: $response;
 			};
 		});
+		if ($this->diContainer) {
+			$container['callableResolver'] = function () {
+				return new util\CallableResolverDi($this->diContainer);
+			};
+		}
 	}
 
-	/// Check for the DI container
+	/**
+	 * Create the DI container.
+	 *
+	 * @return \Psr\Container\ContainerInterface
+	 */
 	public function createDiContainer() {
 		return null;
 	}

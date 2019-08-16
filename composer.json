@@ -25,5 +25,6 @@
 		"renanhangai/validator": "Includes validation for request parameters",
 		"maximebf/debugbar": "Provides better debug functionality",
 		"phpdocumentor/reflection-docblock": "Better generation of docs"
-	}
+	},
+	"version": "2.7.0"
 }

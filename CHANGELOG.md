@@ -1,6 +1,13 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [2.7.0](https://github.com/renanhangai/libweb-api/compare/v2.6.0...v2.7.0) (2019-08-16)
+
+
+### Features
+
+* Added DI container on application ([738e4c4](https://github.com/renanhangai/libweb-api/commit/738e4c4))
 
 <a name="2.6.0"></a>
 # [2.6.0](https://github.com/renanhangai/libweb-api/compare/v2.5.1...v2.6.0) (2019-05-09)

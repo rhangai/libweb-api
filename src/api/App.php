@@ -10,12 +10,18 @@ class App extends \Slim\App {
 	/// CLasses for
 	const REQUEST_CLASS = Request::class;
 	const RESPONSE_CLASS = Response::class;
+	const ATTRIBUTE_CONTAINER = 'container';
+
+	/// Di Container
+	private $diContainer;
 
 	/**
 	 * Construct the app using default response and request objects.
 	 */
 	public function __construct($container = array()) {
 		parent::__construct($container);
+
+		$this->diContainer = $this->createDiContainer();
 
 		$container = $this->getContainer();
 		$container['request'] = function ($container) {
@@ -32,13 +38,28 @@ class App extends \Slim\App {
 		});
 	}
 
-	/// Create the response
-	public function createRequest($container) {
-		$requestClass = static::REQUEST_CLASS;
-		return $requestClass::createFromEnvironment($container->get('environment'));
+	/// Check for the DI container
+	public function createDiContainer() {
+		return null;
+	}
+
+	/// Get the DI container
+	public function getDiContainer() {
+		return $this->diContainer;
 	}
 
 	/// Create the request
+	public function createRequest($container) {
+		$requestClass = static::REQUEST_CLASS;
+		$request = $requestClass::createFromEnvironment($container->get('environment'));
+		if ($this->diContainer) {
+			$request = $request->withAttribute(static::ATTRIBUTE_CONTAINER, $this->diContainer);
+			$this->diContainer->set($requestClass, $request);
+		}
+		return $request;
+	}
+
+	/// Create the response
 	public function createResponse($container) {
 		$responseClass = static::RESPONSE_CLASS;
 		$headers = new \Slim\Http\Headers(['Content-Type' => 'text/html; charset=UTF-8']);
@@ -234,7 +255,11 @@ class App extends \Slim\App {
 		if (!class_exists($class)) {
 			throw new \Slim\Exception\NotFoundException($request, $response);
 		}
-		$obj = new $class($this);
+		if ($this->diContainer) {
+			$obj = $this->diContainer->make($class);
+		} else {
+			$obj = new $class();
+		}
 		$args = [$request, $response, $params];
 
 		$methodbase = str_replace(' ', '', lcfirst(ucwords(str_replace('-', ' ', $methodbase))));

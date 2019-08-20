@@ -298,11 +298,8 @@ class App extends \Slim\App {
 				throw $data;
 			}
 			$response = $response->withStatus(500);
-			$responseData = array('status' => 'error', 'error' => new Serializable($data));
-		} else {
-			$responseData = array('status' => 'success', 'data' => new Serializable($data));
 		}
-		return $response->withJson($responseData);
+		return $response->withJson(new Serializable($data));
 	}
 
 	/**

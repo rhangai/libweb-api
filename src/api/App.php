@@ -297,6 +297,7 @@ class App extends \Slim\App {
 			if (!$data instanceof \JsonSerializable) {
 				throw $data;
 			}
+			$response = $response->withStatus(500);
 			$responseData = array('status' => 'error', 'error' => new Serializable($data));
 		} else {
 			$responseData = array('status' => 'success', 'data' => new Serializable($data));

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.2](https://github.com/renanhangai/libweb-api/compare/v2.7.1...v2.7.2) (2019-08-20)
+
+
+### Bug Fixes
+
+* Status code of response when an error has ocurred ([aec3eb0](https://github.com/renanhangai/libweb-api/commit/aec3eb0))
+
 ### [2.7.1](https://github.com/renanhangai/libweb-api/compare/v2.7.0...v2.7.1) (2019-08-16)
 
 

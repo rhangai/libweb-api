@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/renanhangai/libweb-api/compare/v2.7.2...v3.0.0) (2019-08-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* the default response has changed
+
+### Bug Fixes
+
+* Format response now returns the full data ([4f4e3fd](https://github.com/renanhangai/libweb-api/commit/4f4e3fd))
+
 ### [2.7.2](https://github.com/renanhangai/libweb-api/compare/v2.7.1...v2.7.2) (2019-08-20)
 
 

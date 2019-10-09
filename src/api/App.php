@@ -157,6 +157,40 @@ class App extends \Slim\App {
 	}
 
 	/**
+	 * Overrides the defaults methods.
+	 */
+	public function post($route, $callable) {
+		return parent::post($route, $this->createHandler($callable));
+	}
+
+	public function delete($route, $callable) {
+		return parent::delete($route, $this->createHandler($callable));
+	}
+
+	public function put($route, $callable) {
+		return parent::put($route, $this->createHandler($callable));
+	}
+
+	public function get($route, $callable) {
+		return parent::get($route, $this->createHandler($callable));
+	}
+
+	/**
+	 * Create the handler.
+	 */
+	private function createHandler($callable) {
+		return function ($request, $response, $params) use ($callable) {
+			if (is_string($callable)) {
+				list($class, $method) = explode(':', $callable, 2);
+				if ($method) {
+					return $this->_invokeMethod($class, $method, $request, $response, $params);
+				}
+			}
+			return call_user_func_array($callable, [$request, $response, $params]);
+		};
+	}
+
+	/**
 	 * Map a class to an API path.
 	 *
 	 * @param $base The base path to load
@@ -262,6 +296,16 @@ class App extends \Slim\App {
 	 * Dispatch an API class using the method.
 	 */
 	public function _dispatchApiClass($request, $response, $params, $class, $methodbase) {
+		$methodbase = str_replace(' ', '', lcfirst(ucwords(str_replace('-', ' ', $methodbase))));
+		$methodbase = str_replace('/', '_', $methodbase);
+		$methods = array($request->getMethod() . '_' . $methodbase, 'REQUEST' . '_' . $methodbase);
+		return $this->_invokeMethod($class, $methods, $request, $response, $params);
+	}
+
+	/**
+	 * Invoke the method on the class.
+	 */
+	public function _invokeMethod($class, $methodOrList, $request, $response, $params) {
 		if (!class_exists($class)) {
 			throw new \Slim\Exception\NotFoundException($request, $response);
 		}
@@ -271,15 +315,15 @@ class App extends \Slim\App {
 			$obj = new $class();
 		}
 		$args = [$request, $response, $params];
-
-		$methodbase = str_replace(' ', '', lcfirst(ucwords(str_replace('-', ' ', $methodbase))));
-		$methodbase = str_replace('/', '_', $methodbase);
-
-		$requestMethods = array($request->getMethod(), 'REQUEST');
-		foreach ($requestMethods as $requestMethodName) {
-			$method = $requestMethodName . '_' . $methodbase;
-			if (method_exists($obj, $method)) {
-				return call_user_func_array([$obj, $method], $args);
+		if (is_array($methodOrList)) {
+			foreach ($methodOrList as $method) {
+				if (method_exists($obj, $method)) {
+					return call_user_func_array([$obj, $method], $args);
+				}
+			}
+		} else {
+			if (method_exists($obj, $methodOrList)) {
+				return call_user_func_array([$obj, $methodOrList], $args);
 			}
 		}
 		throw new \Slim\Exception\NotFoundException($request, $response);

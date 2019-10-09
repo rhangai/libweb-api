@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.1](https://github.com/renanhangai/libweb-api/compare/v3.0.0...v3.0.1) (2019-10-09)
+
+
+### Bug Fixes
+
+* delete, put get and post now use the DI if available ([3f5ddc1](https://github.com/renanhangai/libweb-api/commit/3f5ddc1))
+
 ## [3.0.0](https://github.com/renanhangai/libweb-api/compare/v2.7.2...v3.0.0) (2019-08-20)
 
 
